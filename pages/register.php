@@ -11,7 +11,7 @@ if(isset($_SESSION["user_id"])){
 
 // variables nulles
 $email = $password = $confirm_password = $first_name = $last_name = "";
-$email_err = $password_err = $confirm_password_err = $first_name_err = $last_name_err = "";
+$email_err = $password_err = $confirm_password_err = $first_name_err = $last_name_err = $terms_err= "";
 
 if($_SERVER["REQUEST_METHOD"] == "POST"){
 
@@ -83,11 +83,14 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             $confirm_password_err = "Les mots de passe ne correspondent pas.";
         }
     }
-
+    //cocher case CGU
+    if (!isset($_POST['terms'])) {
+        $terms_err = "Vous devez accepter les conditions pour vous inscrire.";
+    }
 
     // Check input errors before inserting in database
 
-    if(empty($email_err) && empty($password_err) && empty($confirm_password_err) && empty($first_name_err) && empty($last_name_err) ){
+    if(empty($email_err) && empty($password_err) && empty($confirm_password_err) && empty($first_name_err) && empty($last_name_err) && empty($terms_err)){
 
         // Determine user type based on email domain
         $user_type = 'student'; // Default
@@ -185,7 +188,15 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                         </div>
                     </div>
 
-
+                    <div class="form-check mb-3">
+                        <input class="form-check-input <?php echo (!empty($terms_err)) ? 'is-invalid' : ''; ?>" type="checkbox" name="terms" value="1" id="terms">
+                        <label class="form-check-label" for="terms">
+                            J'accepte les <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">conditions générales d'utilisation</a>
+                        </label>
+                        <div class="invalid-feedback">
+                            <?php echo $terms_err; ?>
+                        </div>
+                    </div>
 
                     <div class="d-grid mb-3">
                         <button type="submit" class="btn btn-primary btn-lg">S'inscrire</button>
@@ -198,7 +209,36 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     </div>
 </div>
 
+<!-- Condition d'utilisation -->
+<div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="termsModalLabel">Conditions générales d'utilisation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h6>1. Acceptation des conditions</h6>
+                <p>En créant un compte OmnesBnB, vous acceptez de vous conformer aux présentes conditions générales d'utilisation.</p>
 
+                <h6>2. Admissibilité</h6>
+                <p>Pour utiliser OmnesBnB, vous devez être étudiant ou membre du personnel d'Omnes avec une adresse email valide en omnesintervenant.com, ece.fr, ou edu.ece.fr.</p>
+
+                <h6>3. Comptes utilisateurs</h6>
+                <p>Vous êtes responsable de maintenir la confidentialité de votre mot de passe et de votre compte. Vous acceptez de notifier immédiatement OmnesBnB de toute utilisation non autorisée de votre compte.</p>
+
+                <h6>4. Location et services</h6>
+                <p>Tout contenu publié sur OmnesBnB doit être exact et conforme à la réalité. Les prix de location doivent être transparents sans frais cachés.</p>
+
+                <h6>5. Protection des données personnelles</h6>
+                <p>Vos données personnelles sont collectées et traitées conformément à notre politique de confidentialité et à la législation applicable.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 
 
