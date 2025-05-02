@@ -242,3 +242,213 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     }
 }
 ?>
+
+<link rel="stylesheet" href="../css/publish.css">
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="form-card">
+                <h2 class="text-center mb-4">Publier un logement</h2>
+                <p class="text-center mb-4">Partagez votre logement avec d'autres membres de la communauté Omnes</p>
+
+                <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post" enctype="multipart/form-data">
+                    <h5 class="mb-3">Informations de base</h5>
+
+                    <div class="form-floating mb-3">
+                        <input type="text" name="title" class="form-control <?php echo (!empty($title_err)) ? 'is-invalid' : ''; ?>" value="<?php echo htmlspecialchars($title); ?>" id="title" placeholder="Titre de l'annonce" maxlength="100" required>
+                        <label for="title">Titre de l'annonce*</label>
+                        <div class="invalid-feedback">
+                            <?php echo $title_err; ?>
+                        </div>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input type="text" name="location" class="form-control <?php echo (!empty($location_err)) ? 'is-invalid' : ''; ?>" value="<?php echo htmlspecialchars($location); ?>" id="location" placeholder="Quartier (ex: Paris 15ème)" required>
+                        <label for="location">Quartier*</label>
+                        <div class="invalid-feedback">
+                            <?php echo $location_err; ?>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-8">
+                            <div class="form-floating">
+                                <input type="text" name="address" class="form-control" value="<?php echo isset($_POST['address']) ? htmlspecialchars($_POST['address']) : ''; ?>" id="address" placeholder="Adresse complète" required>
+                                <label for="address">Adresse complète*</label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="text" name="postal_code" class="form-control" value="<?php echo isset($_POST['postal_code']) ? htmlspecialchars($_POST['postal_code']) : ''; ?>" id="postal_code" placeholder="Code postal" required pattern="\d{5}">
+                                <label for="postal_code">Code postal*</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <input type="text" name="city" class="form-control" value="Paris" id="city" placeholder="Ville" required>
+                        <label for="city">Ville*</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <textarea class="form-control <?php echo (!empty($description_err)) ? 'is-invalid' : ''; ?>" name="description" id="description" placeholder="Description" style="height: 150px" required minlength="30"><?php echo htmlspecialchars($description); ?></textarea>
+                        <label for="description">Description*</label>
+                        <div class="invalid-feedback">
+                            <?php echo $description_err; ?>
+                        </div>
+                        <div class="form-text">Décrivez votre logement, ses équipements, et les modalités de location (minimum 30 caractères).</div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="number" name="price" class="form-control <?php echo (!empty($price_err)) ? 'is-invalid' : ''; ?>" value="<?php echo htmlspecialchars($price); ?>" id="price" placeholder="Prix par nuit" min="1" step="0.01" required>
+                                <label for="price">Prix par nuit (€)*</label>
+                                <div class="invalid-feedback">
+                                    <?php echo $price_err; ?>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="number" name="max_guests" class="form-control <?php echo (!empty($max_guests_err)) ? 'is-invalid' : ''; ?>" value="<?php echo htmlspecialchars($max_guests); ?>" id="max_guests" placeholder="Nombre max. de personnes" min="1" required>
+                                <label for="max_guests">Nombre max. de personnes*</label>
+                                <div class="invalid-feedback">
+                                    <?php echo $max_guests_err; ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="number" name="surface_area" class="form-control" value="<?php echo isset($_POST['surface_area']) ? htmlspecialchars($_POST['surface_area']) : '25'; ?>" id="surface_area" placeholder="Surface en m²" min="1" required>
+                                <label for="surface_area">Surface en m²*</label>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="number" name="rooms" class="form-control" value="<?php echo isset($_POST['rooms']) ? htmlspecialchars($_POST['rooms']) : '1'; ?>" id="rooms" placeholder="Nombre de pièces" min="1" required>
+                                <label for="rooms">Nombre de pièces*</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 class="mb-3 mt-4">Disponibilité</h5>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="date" name="start_date" class="form-control <?php echo (!empty($start_date_err)) ? 'is-invalid' : ''; ?>" value="<?php echo htmlspecialchars($start_date); ?>" id="start_date" required>
+                                <label for="start_date">Disponible à partir de*</label>
+                                <div class="invalid-feedback">
+                                    <?php echo $start_date_err; ?>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="date" name="end_date" class="form-control <?php echo (!empty($end_date_err)) ? 'is-invalid' : ''; ?>" value="<?php echo htmlspecialchars($end_date); ?>" id="end_date" required>
+                                <label for="end_date">Disponible jusqu'à*</label>
+                                <div class="invalid-feedback">
+                                    <?php echo $end_date_err; ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 class="mb-3 mt-4">Type de logement*</h5>
+
+                    <div class="mb-3 <?php echo (!empty($type_err)) ? 'is-invalid' : ''; ?>">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="type" id="type_rental" value="rental" <?php echo (isset($_POST['type']) && $_POST['type'] == "rental") ? "checked" : ""; ?> required>
+                            <label class="form-check-label" for="type_rental">
+                                <strong>Location complète</strong> - Je loue tout mon logement pendant mon absence
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="type" id="type_colocation" value="colocation" <?php echo (isset($_POST['type']) && $_POST['type'] == "colocation") ? "checked" : ""; ?> required>
+                            <label class="form-check-label" for="type_colocation">
+                                <strong>Colocation</strong> - Je propose une chambre ou un espace dans mon logement
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="type" id="type_notice" value="notice" <?php echo (isset($_POST['type']) && $_POST['type'] == "notice") ? "checked" : ""; ?> required>
+                            <label class="form-check-label" for="type_notice">
+                                <strong>Je libère mon logement</strong> - J'annonce que mon logement sera disponible (information seulement)
+                            </label>
+                        </div>
+                    </div>
+                    <div class="invalid-feedback <?php echo (!empty($type_err)) ? 'd-block' : ''; ?>">
+                        <?php echo $type_err ?: 'Veuillez sélectionner un type de logement.'; // Provide default message if $type_err is empty but field is invalid ?>
+                    </div>
+
+
+                    <h5 class="mb-3 mt-4">Équipements</h5>
+                    <p class="text-muted small mb-3">Sélectionnez les équipements disponibles dans votre logement</p>
+
+                    <div class="amenities-container row mb-4">
+                        <?php                        $all_amenities = [
+                            'Wi-Fi' => 'fa-wifi', 'Télévision' => 'fa-tv', 'Cuisine équipée' => 'fa-utensils',
+                            'Machine à laver' => 'fa-tshirt', 'Sèche-linge' => 'fa-wind', 'Climatisation' => 'fa-snowflake',
+                            'Chauffage' => 'fa-temperature-high', 'Espace de travail' => 'fa-laptop', 'Parking' => 'fa-parking',
+                            'Ascenseur' => 'fa-elevator', 'Balcon' => 'fa-cloud-sun', 'Salle de bain privée' => 'fa-bath'
+                        ];
+                        $selected_amenities = isset($_POST['amenities']) && is_array($_POST['amenities']) ? $_POST['amenities'] : [];
+
+                        foreach ($all_amenities as $amenity => $icon) {
+                            $checked = in_array($amenity, $selected_amenities) ? 'checked' : '';
+                            echo "<div class='col-6 col-md-4 col-lg-3 mb-3'>
+                                    <div class='amenity-item' data-amenity='{$amenity}'>
+                                        <i class='fas {$icon}'></i>
+                                        <span>{$amenity}</span>
+                                        <input type='checkbox' name='amenities[]' value='{$amenity}' class='d-none' {$checked}>
+                                    </div>
+                                  </div>";
+                        }
+                        ?>
+                    </div>
+
+                    <h5 class="mb-3 mt-4">Photos*</h5>
+                    <p class="text-muted small mb-3">Ajoutez des photos attrayantes de votre logement (première photo = photo principale)</p>
+
+                    <div class="image-upload-wrapper mb-3 <?php echo (!empty($image_err)) ? 'is-invalid' : ''; ?>">
+                        <div class="image-upload-container">
+                            <i class="fas fa-images fa-2x mb-2"></i>
+                            <p class="mb-1">Glissez et déposez vos images ici</p>
+                            <p class="text-muted small">ou</p>
+                            <label for="property_images" class="btn btn-outline-primary btn-sm">
+                                Parcourir les fichiers
+                            </label>
+                            <input class="image-upload-input" type="file" id="property_images" name="property_images[]" accept="image/jpeg, image/png, image/gif" multiple hidden required>
+                        </div>
+                        <div class="form-text mt-2">Formats acceptés : JPG, PNG, GIF. Max 5MB par image. Au moins une image requise.</div>
+                        <div class="invalid-feedback <?php echo (!empty($image_err)) ? 'd-block' : ''; ?>">
+                            <?php echo $image_err ?: 'Veuillez télécharger au moins une image.'; // Provide default message ?>
+                        </div>
+                    </div>
+
+
+                    <div class="image-previews-container mb-4">
+                        <div id="image_preview" class="row g-3">
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">Publier mon logement</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../js/publish.js"></script>
+
+<?php include "../includes/footer.php"; ?>
+
