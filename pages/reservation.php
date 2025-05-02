@@ -138,5 +138,107 @@
         <?php endif; ?>
     </div>
 
+    <!-- Past Reservations -->
+    <div class="tab-pane fade <?php echo $active_tab == 'past' ? 'show active' : ''; ?>" id="past">
+        <?php if(empty($past_reservations)): ?>
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Vous n'avez pas de réservations passées.
+            </div>
+        <?php else: ?>
+            <div class="row">
+                <?php foreach($past_reservations as $reservation): ?>
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card reservation-card h-100">
+                            <div class="position-relative">
+                                <?php if(!empty($reservation['main_image'])): ?>
+                                    <img src="../<?php echo htmlspecialchars($reservation['main_image']); ?>" class="card-img-top" alt="<?php echo htmlspecialchars($reservation['title']); ?>" style="height: 200px; object-fit: cover;">
+                                <?php else: ?>
+                                    <img src="../assets/property_images/default-property.jpg" class="card-img-top" alt="<?php echo htmlspecialchars($reservation['title']); ?>" style="height: 200px; object-fit: cover;">
+                                <?php endif; ?>
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title"><?php echo htmlspecialchars($reservation['title']); ?></h5>
+                                <p class="card-text text-muted mb-2">
+                                    <i class="fas fa-map-marker-alt me-1"></i>
+                                    <?php echo htmlspecialchars($reservation['location']); ?>
+                                </p>
+                                <p class="card-text">
+                                    <span class="badge bg-secondary mb-2">Terminé</span><br>
+                                    Du <?php echo date('d/m/Y', strtotime($reservation['start_date'])); ?>
+                                    au <?php echo date('d/m/Y', strtotime($reservation['end_date'])); ?>
+                                </p>
+                                <p class="card-text">
+                                    <small class="text-muted">Total payé: <?php echo number_format($reservation['total_price'], 2, ',', ' '); ?> €</small>
+                                </p>                                    <div class="action-buttons mt-3">
+                                    <!-- Ajout du bouton pour contacter le propriétaire -->
+                                    <a href="messages.php?property_id=<?php echo $reservation['property_id']; ?>&receiver_id=<?php echo $reservation['owner_id']; ?>" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-comment-alt me-1"></i> Contacter l'hôte
+                                    </a>
+                                    <?php if(!isset($reservation['has_review'])): ?>
+                                        <a href="review.php?booking_id=<?php echo $reservation['id']; ?>" class="btn btn-sm btn-outline-success">
+                                            Laisser un avis
+                                        </a>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    </div>
+
+    <!-- Cancelled Reservations -->
+    <div class="tab-pane fade <?php echo $active_tab == 'cancelled' ? 'show active' : ''; ?>" id="cancelled">
+        <?php if(empty($cancelled_reservations)): ?>
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Vous n'avez pas de réservations annulées.
+            </div>
+        <?php else: ?>
+            <div class="row">
+                <?php foreach($cancelled_reservations as $reservation): ?>
+                    <div class="col-md-6 col-lg-4 mb-4">
+                        <div class="card reservation-card h-100 bg-light">
+                            <div class="position-relative">
+                                <?php if(!empty($reservation['main_image'])): ?>
+                                    <img src="../<?php echo htmlspecialchars($reservation['main_image']); ?>" class="card-img-top opacity-50" alt="<?php echo htmlspecialchars($reservation['title']); ?>" style="height: 200px; object-fit: cover;">
+                                <?php else: ?>
+                                    <img src="../assets/property_images/default-property.jpg" class="card-img-top opacity-50" alt="<?php echo htmlspecialchars($reservation['title']); ?>" style="height: 200px; object-fit: cover;">
+                                <?php endif; ?>
+
+                                <div class="badge bg-danger position-absolute" style="top: 15px; left: 15px;">
+                                    Annulé
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <h5 class="card-title text-muted"><?php echo htmlspecialchars($reservation['title']); ?></h5>
+                                <p class="card-text text-muted mb-2">
+                                    <i class="fas fa-map-marker-alt me-1"></i>
+                                    <?php echo htmlspecialchars($reservation['location']); ?>
+                                </p>
+                                <p class="card-text text-muted">
+                                    Du <?php echo date('d/m/Y', strtotime($reservation['start_date'])); ?>
+                                    au <?php echo date('d/m/Y', strtotime($reservation['end_date'])); ?>
+                                </p>
+                                <p class="card-text">
+                                    <small class="text-muted">Annulé le <?php echo date('d/m/Y', strtotime($reservation['updated_at'])); ?></small>
+                                </p>                                    <div class="action-buttons mt-3">
+                                    <!-- Ajout du bouton pour contacter le propriétaire -->
+                                    <a href="messages.php?property_id=<?php echo $reservation['property_id']; ?>&receiver_id=<?php echo $reservation['owner_id']; ?>" class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-comment-alt me-1"></i> Contacter l'hôte
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
+
+
 
 <?php include "../includes/footer.php"; ?>
