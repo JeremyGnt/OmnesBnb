@@ -97,3 +97,263 @@ if ($user_id) {
     mysqli_stmt_execute($activity_stmt);
 }
 ?>
+
+
+<div class="container property-details-page my-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="property-title"><?= htmlspecialchars($property['title']) ?></h1>
+            <p class="property-location">
+                <i class="fas fa-map-marker-alt"></i> <?= htmlspecialchars($property['location']) ?>, <?= htmlspecialchars($property['city']) ?>
+            </p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <?php if ($user_id && $user_id != $property['owner_id']): ?>
+                <button class="btn favorite-button-lg <?= $property['is_favorite'] ? 'favorited' : '' ?>"
+                        data-property-id="<?= $property['id'] ?>">
+                    <i class="<?= $property['is_favorite'] ? 'fas' : 'far' ?> fa-heart"></i>
+                    <?= $property['is_favorite'] ? 'Retiré des favoris' : 'Ajouter aux favoris' ?>
+                </button>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <div class="property-gallery mb-4">
+        <div class="image-gallery-container">
+
+            <div class="image-carousel">
+                <div class="carousel-container">
+                    <?php foreach ($images as $index => $image): ?>
+                        <div class="carousel-slide <?= $index === 0 ? 'active' : '' ?>" data-index="<?= $index ?>">
+                            <img src="../<?= htmlspecialchars($image) ?>" class="img-fluid carousel-image" alt="<?= htmlspecialchars($property['title']) ?> image <?= $index+1 ?>">
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+
+                <?php if (count($images) > 1): ?>
+                    <button class="carousel-nav prev">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="carousel-nav next">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+
+                    <div class="carousel-indicators">
+                        <?php for ($i = 0; $i < count($images); $i++): ?>
+                            <span class="indicator <?= $i === 0 ? 'active' : '' ?>" data-index="<?= $i ?>"></span>
+                        <?php endfor; ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+
+            <div class="thumbnail-container d-none d-md-block">
+                <div class="thumbnail-row">
+                    <?php foreach ($images as $index => $image): ?>
+                        <div class="thumbnail <?= $index === 0 ? 'active' : '' ?>" data-index="<?= $index ?>">
+                            <img src="../<?= htmlspecialchars($image) ?>" alt="Thumbnail <?= $index+1 ?>">
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+        </div>
+    </div><div class="row">
+        <div class="col-lg-8">
+            <div class="host-section mb-4">
+                <div class="d-flex align-items-center">
+                    <img src="../<?= htmlspecialchars($property['profile_image']) ?>" class="host-image" alt="Host">
+                    <div class="ms-3">
+                        <h5 class="mb-0">Logement proposé par <?= htmlspecialchars($property['first_name']) ?> <?= htmlspecialchars($property['last_name']) ?></h5>
+                        <p class="text-muted mb-0">Propriétaire</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="property-description mb-4">
+                <h3>Description</h3>
+                <p><?= nl2br(htmlspecialchars($property['description'])) ?></p>
+            </div>
+
+            <div class="property-features mb-4">
+                <h3>Caractéristiques</h3>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="features-list">
+                            <li><i class="fas fa-home"></i> <?= htmlspecialchars(ucfirst($property['property_type'])) ?></li>
+                            <li><i class="fas fa-expand"></i> <?= htmlspecialchars($property['surface_area']) ?> m²</li>
+                            <li><i class="fas fa-door-open"></i> <?= htmlspecialchars($property['rooms']) ?> pièce(s)</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="features-list">
+                            <li><i class="fas fa-user-friends"></i> <?= htmlspecialchars($property['max_guests']) ?> personne(s) max</li>
+                            <li><i class="fas fa-calendar-alt"></i> Disponible du <?= date('d/m/Y', strtotime($property['available_from'])) ?> au <?= date('d/m/Y', strtotime($property['available_to'])) ?></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="property-amenities mb-4">
+                <h3>Équipements</h3>
+                <div class="row">
+                    <?php foreach ($amenities as $amenity): ?>
+                        <div class="col-md-4 col-6 mb-2">
+                            <div class="amenity-item">
+                                <?php
+                                $icon = 'fas fa-check';
+                                switch (trim($amenity)) {
+                                    case 'Wi-Fi': $icon = 'fas fa-wifi'; break;
+                                    case 'Télévision':
+                                    case 'TV': $icon = 'fas fa-tv'; break;
+                                    case 'Cuisine équipée': $icon = 'fas fa-utensils'; break;
+                                    case 'Machine à laver': $icon = 'fas fa-tshirt'; break;
+                                    case 'Sèche-linge': $icon = 'fas fa-wind'; break;
+                                    case 'Climatisation': $icon = 'fas fa-snowflake'; break;
+                                    case 'Chauffage': $icon = 'fas fa-temperature-high'; break;
+                                    case 'Espace de travail': $icon = 'fas fa-laptop'; break;
+                                    case 'Parking': $icon = 'fas fa-parking'; break;
+                                    case 'Ascenseur': $icon = 'fas fa-elevator'; break;
+                                    case 'Balcon': $icon = 'fas fa-cloud-sun'; break;
+                                    case 'Terrasse': $icon = 'fas fa-umbrella-beach'; break;
+                                    case 'Salle de bain privée': $icon = 'fas fa-bath'; break;
+                                    case 'Cuisine partagée': $icon = 'fas fa-utensils'; break;
+                                    case 'Salle commune': $icon = 'fas fa-couch'; break;
+                                }
+                                ?>
+                                <i class="<?= $icon ?>"></i> <?= htmlspecialchars(trim($amenity)) ?>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+
+            <div class="property-location mb-4">
+                <h3>Adresse</h3>
+                <p>
+                    <?= htmlspecialchars($property['address']) ?><br>
+                    <?= htmlspecialchars($property['postal_code']) ?> <?= htmlspecialchars($property['city']) ?>
+                </p>
+                <div class="location-map">
+                    <iframe
+                        width="100%"
+                        height="300"
+                        frameborder="0"
+                        scrolling="no"
+                        marginheight="0"
+                        marginwidth="0"
+                        src="https://maps.google.com/maps?q=<?= urlencode($property['address'] . ', ' . $property['postal_code'] . ' ' . $property['city']) ?>&t=&z=15&ie=UTF8&iwloc=&output=embed">
+                    </iframe>
+                </div>
+            </div>
+
+            <div class="property-reviews">
+                <h3>Avis (<?= $review_count ?>)</h3>
+                <?php if ($review_count > 0): ?>
+                    <div class="overall-rating mb-3">
+                        <div class="rating-stars">
+                            <?php for ($i = 1; $i <= 5; $i++): ?>
+                                <?php if ($i <= floor($average_rating)): ?>
+                                    <i class="fas fa-star"></i>
+                                <?php elseif ($i - $average_rating < 1 && $i - $average_rating > 0): ?>
+                                    <i class="fas fa-star-half-alt"></i>
+                                <?php else: ?>
+                                    <i class="far fa-star"></i>
+                                <?php endif; ?>
+                            <?php endfor; ?>
+                            <span class="ms-2"><?= $average_rating ?> sur 5</span>
+                        </div>
+                    </div>
+
+                    <div class="reviews-list">
+                        <?php foreach ($reviews as $review): ?>
+                            <div class="review-item">
+                                <div class="d-flex">
+                                    <img src="../<?= htmlspecialchars($review['profile_image']) ?>" class="reviewer-image" alt="Reviewer">
+                                    <div class="ms-3 flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <h5 class="mb-0"><?= htmlspecialchars($review['first_name']) ?> <?= htmlspecialchars($review['last_name'][0]) ?>.</h5>
+                                            <span class="review-date text-muted"><?= date('d/m/Y', strtotime($review['created_at'])) ?></span>
+                                        </div>
+                                        <div class="rating-stars small">
+                                            <?php for ($i = 1; $i <= 5; $i++): ?>
+                                                <i class="<?= $i <= $review['rating'] ? 'fas' : 'far' ?> fa-star"></i>
+                                            <?php endfor; ?>
+                                        </div>
+                                        <p class="mt-2"><?= nl2br(htmlspecialchars($review['comment'])) ?></p>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php else: ?>
+                    <p>Aucun avis pour l'instant.</p>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="booking-card">
+                <h3 class="mb-3">Réserver ce logement</h3>
+                <div class="price-info mb-3">
+                    <span class="price"><?= htmlspecialchars($property['price']) ?>€</span> / nuit
+                </div>
+                <form action="booking.php" method="GET">
+                    <input type="hidden" name="property_id" value="<?= $property_id ?>">
+
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            <label for="check-in" class="form-label">Arrivée</label>
+                            <input type="date" class="form-control" id="check-in" name="check_in"
+                                   min="<?= $property['available_from'] ?>"
+                                   max="<?= $property['available_to'] ?>"
+                                   required>
+                        </div>
+                        <div class="col-6">
+                            <label for="check-out" class="form-label">Départ</label>
+                            <input type="date" class="form-control" id="check-out" name="check_out"
+                                   min="<?= $property['available_from'] ?>"
+                                   max="<?= $property['available_to'] ?>"
+                                   required>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="guests" class="form-label">Voyageurs</label>
+                        <select class="form-select" id="guests" name="guests">
+                            <?php for ($i = 1; $i <= (int)$property['max_guests']; $i++): ?>
+                                <option value="<?= $i ?>"><?= $i ?> voyageur<?= $i > 1 ? 's' : '' ?></option>
+                            <?php endfor; ?>
+                        </select>
+                    </div>
+
+                    <div class="total-calculation mb-3">
+                        <div class="d-flex justify-content-between">
+                            <span><?= htmlspecialchars($property['price']) ?>€ x <span id="nights-count">0</span> nuits</span>
+                            <span id="subtotal">0€</span>
+                        </div>
+                    </div>
+
+                    <div class="total-price d-flex justify-content-between mb-3">
+                        <strong>Total</strong>
+                        <strong id="total-price">0€</strong>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100"<?= $user_id ? '' : ' disabled' ?>>
+                        <?= $user_id ? 'Réserver' : 'Connectez-vous pour réserver' ?>
+                    </button>
+
+                    <?php if ($user_id && $user_id != $property['owner_id']): ?>
+                        <a href="start_conversation.php?property_id=<?= $property_id ?>" class="btn btn-outline-primary w-100 mt-2">
+                            <i class="fas fa-comments me-2"></i>Contacter le propriétaire
+                        </a>
+                    <?php endif; ?>
+
+                    <?php if (!$user_id): ?>
+                        <div class="login-prompt mt-2 text-center">
+                            <a href="login.php?redirect=property-details.php?id=<?= $property_id ?>">Se connecter</a> ou
+                            <a href="register.php">S'inscrire</a>
+                        </div>
+                    <?php endif; ?>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
