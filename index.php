@@ -41,7 +41,6 @@ if ($result = mysqli_query($conn, $sql)) {
                     <div class="hero-image-container">
                         <?php if (count($featured_properties) > 0): ?>
                             <div class="hero-floating-card hero-card-1">
-                                <img src="<?php echo htmlspecialchars($featured_properties[0]['main_image']); ?>" alt="<?php echo htmlspecialchars($featured_properties[0]['title']); ?>" class="hero-card-image" onerror="this.src='assets/property_images/appart.jpg'">
                                 <div class="hero-card-content">
                                     <div class="hero-card-rating"><i class="fas fa-star"></i> <?php echo number_format($featured_properties[0]['average_rating'] ?? 0, 1); ?></div>
                                     <h5><?php echo htmlspecialchars($featured_properties[0]['title']); ?></h5>
@@ -52,7 +51,6 @@ if ($result = mysqli_query($conn, $sql)) {
 
                         <?php if (count($featured_properties) > 1): ?>
                             <div class="hero-floating-card hero-card-2">
-                                <img src="<?php echo htmlspecialchars($featured_properties[1]['main_image']); ?>" alt="<?php echo htmlspecialchars($featured_properties[1]['title']); ?>" class="hero-card-image" onerror="this.src='assets/property_images/appart.jpg'">
                                 <div class="hero-card-content">
                                     <div class="hero-card-rating"><i class="fas fa-star"></i> <?php echo number_format($featured_properties[1]['average_rating'] ?? 0, 1); ?></div>
                                     <h5><?php echo htmlspecialchars($featured_properties[1]['title']); ?></h5>
