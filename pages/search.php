@@ -152,5 +152,49 @@
                 </div>
             <?php endif; ?>
         </div>
+        <!-- Bloc pagination ajouté -->
+        <?php
+        $results_per_page = 8;
+        $total_properties = mysqli_num_rows($full_result); // Résultat sans LIMIT
+        $total_pages = ceil($total_properties / $results_per_page);
+        $current_page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+        ?>
+
+        <?php if ($total_pages > 1): ?>
+            <nav aria-label="Pagination des résultats" class="mt-5">
+                <ul class="pagination justify-content-center">
+                    <?php
+                    $query_params = $_GET;
+                    $query_params['page'] = max(1, $current_page - 1);
+                    $prev_url = '?' . http_build_query($query_params);
+                    ?>
+                    <li class="page-item <?= ($current_page <= 1) ? 'disabled' : '' ?>">
+                        <a class="page-link" href="<?= $prev_url ?>" aria-label="Précédent">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+
+                    <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                        <?php
+                        $query_params['page'] = $i;
+                        $page_url = '?' . http_build_query($query_params);
+                        ?>
+                        <li class="page-item <?= ($i == $current_page) ? 'active' : '' ?>">
+                            <a class="page-link" href="<?= $page_url ?>"><?= $i ?></a>
+                        </li>
+                    <?php endfor; ?>
+
+                    <?php
+                    $query_params['page'] = min($total_pages, $current_page + 1);
+                    $next_url = '?' . http_build_query($query_params);
+                    ?>
+                    <li class="page-item <?= ($current_page >= $total_pages) ? 'disabled' : '' ?>">
+                        <a class="page-link" href="<?= $next_url ?>" aria-label="Suivant">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        <?php endif; ?>
     </div>
 </div>
