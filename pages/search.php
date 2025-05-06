@@ -95,3 +95,62 @@
                     Aucun logement ne correspond à vos critères. Essayez d'élargir votre recherche.
                 </div>
             <?php else: ?>
+                <!-- resultat  -->
+                <div class="row row-cols-1 row-cols-md-2 g-4">
+                    <?php while ($property = mysqli_fetch_assoc($result)): ?>
+                        <div class="col">
+                            <a href="property-details.php?id=<?= $property['id'] ?>" class="property-link">
+                                <div class="card property-card h-100">
+                                    <div class="position-relative">
+                                        <div class="property-image-container">
+                                            <?php $image_path = getPropertyMainImage($conn, $property['id'], $property['main_image']); ?>
+                                            <img src="<?= htmlspecialchars("../" . $image_path) ?>" class="property-image" alt="<?= htmlspecialchars($property['title']) ?>">
+                                        </div>
+
+                                        <?php if ($user_id): ?>
+                                            <button class="favorite-button <?= $property['is_favorite'] ? 'favorited' : '' ?>" data-property-id="<?= $property['id'] ?>">
+                                                <i class="<?= $property['is_favorite'] ? 'fas' : 'far' ?> fa-heart"></i>
+                                            </button>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="property-info">
+                                        <h5 class="card-title"><?= htmlspecialchars($property['title']) ?></h5>
+
+                                        <!-- Emplacement information -->
+                                        <p class="card-text">
+                                            <i class="fas fa-map-marker-alt"></i> <?= htmlspecialchars($property['location']) ?>
+                                        </p>
+
+                                        <!-- Info appart -->
+                                        <div class="property-details mb-3">
+                                            <div>
+                                                <i class="fas fa-home me-1"></i>
+                                                <?= htmlspecialchars(ucfirst($property['property_type'])) ?> -
+                                                <?= htmlspecialchars($property['rooms']) ?> pièce(s)
+                                            </div>
+                                            <div>
+                                                <i class="fas fa-user-friends me-1"></i>
+                                                <?= htmlspecialchars($property['max_guests']) ?> voyageur(s) max
+                                            </div>
+                                        </div>
+
+                                        <!-- Info prix  -->
+                                        <div class="reservation-price">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <i class="fas fa-euro-sign me-1"></i>
+                                                    Prix par nuit
+                                                </div>
+                                                <span class="price-amount"><?= number_format($property['price'], 2, ',', ' ') ?> €</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    <?php endwhile; ?>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
