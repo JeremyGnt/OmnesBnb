@@ -83,43 +83,15 @@
             </div>
         </div>
 
-        <!-- filtres supplémentaires-->
-        <div class="col-lg-3 mt-4">
-            <div id="advanced-filters" class="d-none d-lg-block">
-                <div class="search-filters">
-                    <h5 class="mb-3">Filtres Avancés</h5>
-
-                    <form id="advanced-filters-form" method="GET" action="search.php">
-                        <div class="mb-3">
-                            <label for="rating" class="form-label">Évaluation minimale</label>
-                            <select class="form-select" id="rating" name="rating">
-                                <option value="">Toutes les évaluations</option>
-                                <option value="1">1 étoile</option>
-                                <option value="2">2 étoiles</option>
-                                <option value="3">3 étoiles</option>
-                                <option value="4">4 étoiles</option>
-                                <option value="5">5 étoiles</option>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="amenities" class="form-label">Commodités</label>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="wifi" id="wifi" name="amenities[]">
-                                <label class="form-check-label" for="wifi">Wi-Fi</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="pool" id="pool" name="amenities[]">
-                                <label class="form-check-label" for="pool">Piscine</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="parking" id="parking" name="amenities[]">
-                                <label class="form-check-label" for="parking">Parking</label>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn btn-secondary w-100">Appliquer les filtres avancés</button>
-                    </form>
-                </div>
+        <!-- Colonne des resulats -->
+        <div class="col-lg-9">
+            <!-- Results Count -->
+            <div class="mb-4">
+                <h5><?= $count ?> logement(s) trouvé(s)</h5>
             </div>
-        </div>
+
+            <?php if ($count == 0): ?>
+                <div class="alert alert-info">
+                    Aucun logement ne correspond à vos critères. Essayez d'élargir votre recherche.
+                </div>
+            <?php else: ?>
