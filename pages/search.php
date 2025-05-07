@@ -83,43 +83,118 @@
             </div>
         </div>
 
-        <!-- filtres supplémentaires-->
-        <div class="col-lg-3 mt-4">
-            <div id="advanced-filters" class="d-none d-lg-block">
-                <div class="search-filters">
-                    <h5 class="mb-3">Filtres Avancés</h5>
-
-                    <form id="advanced-filters-form" method="GET" action="search.php">
-                        <div class="mb-3">
-                            <label for="rating" class="form-label">Évaluation minimale</label>
-                            <select class="form-select" id="rating" name="rating">
-                                <option value="">Toutes les évaluations</option>
-                                <option value="1">1 étoile</option>
-                                <option value="2">2 étoiles</option>
-                                <option value="3">3 étoiles</option>
-                                <option value="4">4 étoiles</option>
-                                <option value="5">5 étoiles</option>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="amenities" class="form-label">Commodités</label>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="wifi" id="wifi" name="amenities[]">
-                                <label class="form-check-label" for="wifi">Wi-Fi</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="pool" id="pool" name="amenities[]">
-                                <label class="form-check-label" for="pool">Piscine</label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="parking" id="parking" name="amenities[]">
-                                <label class="form-check-label" for="parking">Parking</label>
-                            </div>
-                        </div>
-
-                        <button type="submit" class="btn btn-secondary w-100">Appliquer les filtres avancés</button>
-                    </form>
-                </div>
+        <!-- Colonne des resulats -->
+        <div class="col-lg-9">
+            <!-- Results Count -->
+            <div class="mb-4">
+                <h5><?= $count ?> logement(s) trouvé(s)</h5>
             </div>
+
+            <?php if ($count == 0): ?>
+                <div class="alert alert-info">
+                    Aucun logement ne correspond à vos critères. Essayez d'élargir votre recherche.
+                </div>
+            <?php else: ?>
+                <!-- resultat  -->
+                <div class="row row-cols-1 row-cols-md-2 g-4">
+                    <?php while ($property = mysqli_fetch_assoc($result)): ?>
+                        <div class="col">
+                            <a href="property-details.php?id=<?= $property['id'] ?>" class="property-link">
+                                <div class="card property-card h-100">
+                                    <div class="position-relative">
+                                        <div class="property-image-container">
+                                            <?php $image_path = getPropertyMainImage($conn, $property['id'], $property['main_image']); ?>
+                                            <img src="<?= htmlspecialchars("../" . $image_path) ?>" class="property-image" alt="<?= htmlspecialchars($property['title']) ?>">
+                                        </div>
+
+                                        <?php if ($user_id): ?>
+                                            <button class="favorite-button <?= $property['is_favorite'] ? 'favorited' : '' ?>" data-property-id="<?= $property['id'] ?>">
+                                                <i class="<?= $property['is_favorite'] ? 'fas' : 'far' ?> fa-heart"></i>
+                                            </button>
+                                        <?php endif; ?>
+                                    </div>
+                                    <div class="property-info">
+                                        <h5 class="card-title"><?= htmlspecialchars($property['title']) ?></h5>
+
+                                        <!-- Emplacement information -->
+                                        <p class="card-text">
+                                            <i class="fas fa-map-marker-alt"></i> <?= htmlspecialchars($property['location']) ?>
+                                        </p>
+
+                                        <!-- Info appart -->
+                                        <div class="property-details mb-3">
+                                            <div>
+                                                <i class="fas fa-home me-1"></i>
+                                                <?= htmlspecialchars(ucfirst($property['property_type'])) ?> -
+                                                <?= htmlspecialchars($property['rooms']) ?> pièce(s)
+                                            </div>
+                                            <div>
+                                                <i class="fas fa-user-friends me-1"></i>
+                                                <?= htmlspecialchars($property['max_guests']) ?> voyageur(s) max
+                                            </div>
+                                        </div>
+
+                                        <!-- Info prix  -->
+                                        <div class="reservation-price">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <i class="fas fa-euro-sign me-1"></i>
+                                                    Prix par nuit
+                                                </div>
+                                                <span class="price-amount"><?= number_format($property['price'], 2, ',', ' ') ?> €</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    <?php endwhile; ?>
+                </div>
+            <?php endif; ?>
         </div>
+        <!-- Bloc pagination ajouté -->
+        <?php
+        $results_per_page = 8;
+        $total_properties = mysqli_num_rows($full_result); // Résultat sans LIMIT
+        $total_pages = ceil($total_properties / $results_per_page);
+        $current_page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
+        ?>
+
+        <?php if ($total_pages > 1): ?>
+            <nav aria-label="Pagination des résultats" class="mt-5">
+                <ul class="pagination justify-content-center">
+                    <?php
+                    $query_params = $_GET;
+                    $query_params['page'] = max(1, $current_page - 1);
+                    $prev_url = '?' . http_build_query($query_params);
+                    ?>
+                    <li class="page-item <?= ($current_page <= 1) ? 'disabled' : '' ?>">
+                        <a class="page-link" href="<?= $prev_url ?>" aria-label="Précédent">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+
+                    <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                        <?php
+                        $query_params['page'] = $i;
+                        $page_url = '?' . http_build_query($query_params);
+                        ?>
+                        <li class="page-item <?= ($i == $current_page) ? 'active' : '' ?>">
+                            <a class="page-link" href="<?= $page_url ?>"><?= $i ?></a>
+                        </li>
+                    <?php endfor; ?>
+
+                    <?php
+                    $query_params['page'] = min($total_pages, $current_page + 1);
+                    $next_url = '?' . http_build_query($query_params);
+                    ?>
+                    <li class="page-item <?= ($current_page >= $total_pages) ? 'disabled' : '' ?>">
+                        <a class="page-link" href="<?= $next_url ?>" aria-label="Suivant">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        <?php endif; ?>
+    </div>
+</div>

@@ -15,20 +15,20 @@ $email_err = $password_err = $confirm_password_err = $first_name_err = $last_nam
 
 if($_SERVER["REQUEST_METHOD"] == "POST"){
 
-    // Validate email
+
     if(empty(trim($_POST["email"]))){
         $email_err = "Veuillez entrer un email.";
     } else{
-        // Check email format
+
         $email = trim($_POST["email"]);
         if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
             $email_err = "Format d'email invalide.";
         } else {
-            // Check if email domain is from Omnes
+
             if(!preg_match("/@(omnesintervenant\.com|ece\.fr|edu\.ece\.fr)$/", $email)){
                 $email_err = "Seules les adresses email d'Omnes sont autorisées.";
             } else {
-                // Check if email already exists
+
                 $sql = "SELECT id FROM users WHERE email = ?";
 
                 if($stmt = mysqli_prepare($conn, $sql)){
@@ -51,21 +51,21 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         }
     }
 
-    // Validate first name
+
     if(empty(trim($_POST["first_name"]))){
         $first_name_err = "Veuillez entrer votre prénom.";
     } else{
         $first_name = trim($_POST["first_name"]);
     }
 
-    // Validate last name
+
     if(empty(trim($_POST["last_name"]))){
         $last_name_err = "Veuillez entrer votre nom.";
     } else{
         $last_name = trim($_POST["last_name"]);
     }
 
-    // Validate password
+
     if(empty(trim($_POST["password"]))){
         $password_err = "Veuillez entrer un mot de passe.";
     } elseif(strlen(trim($_POST["password"])) < 8){
@@ -74,7 +74,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         $password = trim($_POST["password"]);
     }
 
-    // Validate confirm password
+
     if(empty(trim($_POST["confirm_password"]))){
         $confirm_password_err = "Veuillez confirmer le mot de passe.";
     } else{
@@ -88,11 +88,11 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         $terms_err = "Vous devez accepter les conditions pour vous inscrire.";
     }
 
-    // Check input errors before inserting in database
+
 
     if(empty($email_err) && empty($password_err) && empty($confirm_password_err) && empty($first_name_err) && empty($last_name_err) && empty($terms_err)){
 
-        // Determine user type based on email domain
+
         $user_type = 'student'; // Default
         if(preg_match("/@ece\.fr$/", $email)) {
             $user_type = 'staff';
@@ -100,23 +100,23 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             $user_type = 'staff';
         }
 
-        // Prepare an insert statement
+
         $sql = "INSERT INTO users (email, password, first_name, last_name, user_type, is_verified) VALUES (?, ?, ?, ?, ?, FALSE)";
 
         if($stmt = mysqli_prepare($conn, $sql)){
-            // Bind variables to the prepared statement as parameters
+
             mysqli_stmt_bind_param($stmt, "sssss", $param_email, $param_password, $param_first_name, $param_last_name, $param_user_type);
 
-            // Set parameters
+
             $param_email = $email;
             $param_password = password_hash($password, PASSWORD_DEFAULT); // Creates a password hash
             $param_first_name = $first_name;
             $param_last_name = $last_name;
             $param_user_type = $user_type;
 
-            // Attempt to execute the prepared statement
+
             if(mysqli_stmt_execute($stmt)){
-                // Redirect to login page
+
                 $_SESSION['message'] = "Inscription réussie. Vous pouvez maintenant vous connecter.";
                 $_SESSION['message_type'] = "success";
                 header("location: login.php");
@@ -124,12 +124,12 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 echo "Oops! Une erreur est survenue. Veuillez réessayer plus tard.";
             }
 
-            // Close statement
+
             mysqli_stmt_close($stmt);
         }
     }
 
-    // Close connection
+
     mysqli_close($conn);
 }
 ?>
