@@ -208,39 +208,89 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
             $sql = "UPDATE users SET username = ?, email = ?, first_name = ?, last_name = ?, phone_number = ?" .
                 ($upload_image ? ", profile_image = ?" : "") . " WHERE id = ?";
         }
-        //////CONTINUER PHP
+        if($stmt = mysqli_prepare($conn, $sql)){
+            if(!empty($current_password) && !empty($new_password) && !empty($confirm_password)){
+                if($upload_image){
+                    mysqli_stmt_bind_param(
+                        $stmt,
+                        "ssssssi",
+                        $param_username,
+                        $param_email,
+                        $param_first_name,
+                        $param_last_name,
+                        $param_phone,
+                        $param_password,
+                        $param_profile_image,
+                        $param_id
+                    );
+                    $param_profile_image = $new_profile_image;
+                } else {
+                    mysqli_stmt_bind_param(
+                        $stmt,
+                        "sssssi",
+                        $param_username,
+                        $param_email,
+                        $param_first_name,
+                        $param_last_name,
+                        $param_phone,
+                        $param_password,
+                        $param_id
+                    );
+                }
+                $param_password = password_hash($new_password, PASSWORD_DEFAULT);
+            } else {
+                if($upload_image){
+                    mysqli_stmt_bind_param(
+                        $stmt,
+                        "ssssssi",
+                        $param_username,
+                        $param_email,
+                        $param_first_name,
+                        $param_last_name,
+                        $param_phone,
+                        $param_profile_image,
+                        $param_id
+                    );
+                    $param_profile_image = $new_profile_image;
+                } else {                    mysqli_stmt_bind_param(
+                    $stmt,
+                    "sssssi",
+                    $param_username,
+                    $param_email,
+                    $param_first_name,
+                    $param_last_name,
+                    $param_phone,
+                    $param_id
+                );
+                }
+            }
+
+            $param_username = $username;
+            $param_email = $email;
+            $param_first_name = $first_name;
+            $param_last_name = $last_name;
+            $param_phone = $phone;
+            $param_id = $user_id;
+
+            if(mysqli_stmt_execute($stmt)){
+                $_SESSION["username"] = $username;
+                $_SESSION["email"] = $email;
+                $_SESSION["first_name"] = $first_name;
+                $_SESSION["last_name"] = $last_name;
+
+                $_SESSION["message"] = "Votre profil a été mis à jour avec succès.";
+                $_SESSION["message_type"] = "success";
+
+                header("location: profile.php");
+                exit;
+            } else {
+                echo "Oops! Une erreur est survenue. Veuillez réessayer plus tard.";
+            }
+
+            mysqli_stmt_close($stmt);
+        }
     }
+
+    mysqli_close($conn);
 }
-
 ?>
-
-<div class="container py-4">
-    <div class="row">
-        <div class="col-md-4 mb-4">
-            <div class="profile-header text-center">                <div id="profile_preview">
-                    <img src="../<?php echo htmlspecialchars($profile_image); ?>" alt="Photo de profil" class="profile-avatar mb-3">
-                </div>
-                <h4><?php echo htmlspecialchars($first_name) . ' ' . htmlspecialchars($last_name); ?></h4>
-                <p class="text-muted"><?php echo htmlspecialchars($email); ?></p>
-                <div class="list-group mt-4">
-                    <a href="#profile-info" class="list-group-item list-group-item-action active" data-bs-toggle="list">
-                        <i class="fas fa-user me-2"></i> Informations personnelles
-                    </a>
-                    <a href="messages.php" class="list-group-item list-group-item-action">
-                        <i class="fas fa-envelope me-2"></i> Messages
-                    </a>
-                    <a href="#payment-methods" class="list-group-item list-group-item-action" data-bs-toggle="list">
-                        <i class="fas fa-credit-card me-2"></i> Moyens de paiement
-                    </a>
-                    <a href="#notifications" class="list-group-item list-group-item-action" data-bs-toggle="list">
-                        <i class="fas fa-bell me-2"></i> Notifications
-                    </a>
-                    <a href="#privacy" class="list-group-item list-group-item-action" data-bs-toggle="list">
-                        <i class="fas fa-shield-alt me-2"></i> Confidentialité
-                    </a>                    <a href="#change-password" class="list-group-item list-group-item-action" data-bs-toggle="list">
-                        <i class="fas fa-lock me-2"></i> Changer de mot de passe
-                    </a>
-                </div>
-            </div>
-        </div>
-
