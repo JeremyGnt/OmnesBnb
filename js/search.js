@@ -64,4 +64,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
         });
     });
+    const filterToggle = document.getElementById('filter-toggle');
+    const filtersContainer = document.getElementById('filters-container');
+
+    if (filterToggle && filtersContainer) {
+        filterToggle.addEventListener('click', function() {
+            filtersContainer.classList.toggle('d-none');
+            filtersContainer.classList.toggle('d-block');
+        });
+    }
 });
