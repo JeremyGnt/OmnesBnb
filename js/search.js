@@ -1,23 +1,22 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Filter functionality
+//filtres
     const filterForm = document.getElementById('search-filters');
     const priceRange = document.getElementById('price-range');
     const priceValue = document.getElementById('price-value');
 
-    // Update price value display when slider changes
+   // prix
     if (priceRange && priceValue) {
         priceRange.addEventListener('input', function() {
             priceValue.textContent = priceRange.value + '€';
         });
     }
 
-    // Handle filters form submission with possible AJAX
     if (filterForm) {
         filterForm.addEventListener('submit', function(e) {
         });
     }
 
-    // Handle favorite button clicks
+
     const favoriteButtons = document.querySelectorAll('.favorite-button');
 
     favoriteButtons.forEach(button => {
@@ -27,7 +26,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const propertyId = this.dataset.propertyId;
             const isFavorite = this.classList.contains('favorited');
 
-            // Toggle visual state immediately for better UX
             this.classList.toggle('favorited');
 
             if (isFavorite) {
@@ -36,7 +34,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.innerHTML = '<i class="fas fa-heart"></i>';
             }
 
-            // Send request to server to update favorite status
             fetch('omnesbnb-equipe-2h/includes/favorite_handler.php', {
                 method: 'POST',
                 headers: {
@@ -47,13 +44,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(response => response.json())
                 .then(data => {
                     if (!data.success) {
-                        // Revert the visual change if server operation failed
                         button.classList.toggle('favorited');
                         button.innerHTML = isFavorite ?
                             '<i class="fas fa-heart"></i>' :
                             '<i class="far fa-heart"></i>';
 
-                        // If not logged in, redirect to login
                         if (data.redirect) {
                             window.location.href = data.redirect;
                         }
@@ -69,15 +64,4 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
         });
     });
-
-    // Handle filter toggle for mobile
-    const filterToggle = document.getElementById('filter-toggle');
-    const filtersContainer = document.getElementById('filters-container');
-
-    if (filterToggle && filtersContainer) {
-        filterToggle.addEventListener('click', function() {
-            filtersContainer.classList.toggle('d-none');
-            filtersContainer.classList.toggle('d-block');
-        });
-    }
 });
