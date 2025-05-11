@@ -1,5 +1,165 @@
 <?php
+
+require_once "../includes/db_connection.php";
 include "../includes/header.php";
+
+
+if (!isset($_SESSION["user_id"])) {
+    $_SESSION["message"] = "Vous devez vous connecter pour effectuer une réservation.";
+    $_SESSION["message_type"] = "warning";
+    $_SESSION["redirect_after_login"] = "property-details.php?id=" . (isset($_GET['property_id']) ? $_GET['property_id'] : '');
+    header("Location: login.php");
+    exit;
+}
+
+$user_id = $_SESSION["user_id"];
+
+if (!isset($_GET['property_id']) || !isset($_GET['check_in']) || !isset($_GET['check_out']) || !isset($_GET['guests'])) {
+    $_SESSION["message"] = "Informations de réservation manquantes.";
+    $_SESSION["message_type"] = "warning";
+    header("Location: search.php");
+    exit;
+}
+
+$property_id = (int)$_GET['property_id'];
+$check_in = $_GET['check_in'];
+$check_out = $_GET['check_out'];
+$guests = (int)$_GET['guests'];
+
+$today = date('Y-m-d');
+if ($check_in < $today) {
+    $_SESSION["message"] = "La date d'arrivée ne peut pas être dans le passé.";
+    $_SESSION["message_type"] = "warning";
+    header("Location: property-details.php?id=" . $property_id);
+    exit;
+}
+
+if ($check_out <= $check_in) {
+    $_SESSION["message"] = "La date de départ doit être postérieure à la date d'arrivée.";
+    $_SESSION["message_type"] = "warning";
+    header("Location: property-details.php?id=" . $property_id);
+    exit;
+}
+
+$property_sql = "SELECT p.*, u.first_name, u.last_name 
+                FROM properties p 
+                JOIN users u ON p.owner_id = u.id 
+                WHERE p.id = ? AND p.is_published = TRUE";
+
+$stmt = mysqli_prepare($conn, $property_sql);
+mysqli_stmt_bind_param($stmt, "i", $property_id);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
+
+if (mysqli_num_rows($result) === 0) {
+    $_SESSION["message"] = "Ce logement n'existe pas ou n'est pas disponible.";
+    $_SESSION["message_type"] = "warning";
+    header("Location: search.php");
+    exit;
+}
+
+$property = mysqli_fetch_assoc($result);
+
+// Verif que le proprio n'est pas le locataire
+if ($property['owner_id'] == $user_id) {
+    $_SESSION["message"] = "Vous ne pouvez pas réserver votre propre logement.";
+    $_SESSION["message_type"] = "warning";
+    header("Location: property-details.php?id=" . $property_id);
+    exit;
+}
+
+//verif si date proprio ok
+if ($check_in < $property['available_from'] || $check_out > $property['available_to']) {
+    $_SESSION["message"] = "Le logement n'est pas disponible pour les dates sélectionnées.";
+    $_SESSION["message_type"] = "warning";
+    header("Location: property-details.php?id=" . $property_id);
+    exit;
+}
+
+// verif le nombre de personne
+if ($guests <= 0 || $guests > $property['max_guests']) {
+    $_SESSION["message"] = "Le nombre de voyageurs est invalide.";
+    $_SESSION["message_type"] = "warning";
+    header("Location: property-details.php?id=" . $property_id);
+    exit;
+}
+
+// verif si deja réservé
+$check_availability_sql = "SELECT id 
+                          FROM bookings 
+                          WHERE property_id = ? 
+                          AND status != 'cancelled' 
+                          AND ((start_date <= ? AND end_date >= ?) OR (start_date <= ? AND end_date >= ?) OR (start_date >= ? AND end_date <= ?))";
+
+$availability_stmt = mysqli_prepare($conn, $check_availability_sql);
+mysqli_stmt_bind_param($availability_stmt, "issssss", $property_id, $check_out, $check_in, $check_in, $check_out, $check_in, $check_out);
+mysqli_stmt_execute($availability_stmt);
+$availability_result = mysqli_stmt_get_result($availability_stmt);
+
+if (mysqli_num_rows($availability_result) > 0) {
+    $_SESSION["message"] = "Le logement est déjà réservé pour ces dates.";
+    $_SESSION["message_type"] = "warning";
+    header("Location: property-details.php?id=" . $property_id);
+    exit;
+}
+
+// nb de nuit et prix
+$check_in_date = new DateTime($check_in);
+$check_out_date = new DateTime($check_out);
+$interval = $check_in_date->diff($check_out_date);
+$nights = $interval->days;
+$total_price = $property['price'] * $nights;
+
+// confirme la resa
+if (isset($_POST['confirm_booking'])) {    // insert dans la base
+    $booking_sql = "INSERT INTO bookings (property_id, user_id, start_date, end_date, guests, total_price, status, created_at, updated_at) 
+                   VALUES (?, ?, ?, ?, ?, ?, 'pending', NOW(), NOW())";
+
+    $booking_stmt = mysqli_prepare($conn, $booking_sql);
+    mysqli_stmt_bind_param($booking_stmt, "iissid", $property_id, $user_id, $check_in, $check_out, $guests, $total_price);
+    if (mysqli_stmt_execute($booking_stmt)) {
+        $booking_id = mysqli_insert_id($conn);
+
+        // Enregistrement de l'activité de l'utilisateur
+        $activity_sql = "INSERT INTO user_activity (user_id, activity_type, property_id) VALUES (?, 'booking', ?)";
+        $activity_stmt = mysqli_prepare($conn, $activity_sql);
+        mysqli_stmt_bind_param($activity_stmt, "ii", $user_id, $property_id);
+        mysqli_stmt_execute($activity_stmt);
+
+        $_SESSION["message"] = "Réservation confirmée avec succès!";
+        $_SESSION["message_type"] = "success";
+        header("Location: reservation.php");
+        exit;
+    } else {
+        $_SESSION["message"] = "Une erreur est survenue lors de la réservation. Veuillez réessayer.";
+        $_SESSION["message_type"] = "danger";
+    }
+}
+
+
+$images_sql = "SELECT image_path FROM property_images WHERE property_id = ? LIMIT 1";
+$images_stmt = mysqli_prepare($conn, $images_sql);
+mysqli_stmt_bind_param($images_stmt, "i", $property_id);
+mysqli_stmt_execute($images_stmt);
+$images_result = mysqli_stmt_get_result($images_stmt);
+
+$image_path = "";
+if (mysqli_num_rows($images_result) > 0) {
+    $image = mysqli_fetch_assoc($images_result);
+    $image_path = $image['image_path'];
+} else if (!empty($property['main_image'])) {
+    $image_path = $property['main_image'];
+} else {
+    $image_path = "assets/property_images/default.jpg";
+}
+
+
+$user_sql = "SELECT * FROM users WHERE id = ?";
+$user_stmt = mysqli_prepare($conn, $user_sql);
+mysqli_stmt_bind_param($user_stmt, "i", $user_id);
+mysqli_stmt_execute($user_stmt);
+$user_result = mysqli_stmt_get_result($user_stmt);
+$user = mysqli_fetch_assoc($user_result);
 ?>
 
 <div class="container py-4">
