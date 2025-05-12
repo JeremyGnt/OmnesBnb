@@ -245,7 +245,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 
 <link rel="stylesheet" href="../css/publish.css">
 
-<div class="container py-4">
+    <div class="container py-4">
     <div class="row justify-content-center">
         <div class="col-lg-8">
             <div class="form-card">
