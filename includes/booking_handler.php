@@ -34,22 +34,53 @@ if ($booking_id <= 0 || empty($action)) {
     echo json_encode($response);
     exit;
 }
-);
-echo json_encode($response);
-} else {
-    $response = array(
-        "success" => false,
-        "message" => "Erreur lors de la confirmation de la réservation."
-    );
-    echo json_encode($response);
-}
+$check_ownership_sql = "SELECT b.*, p.owner_id 
+                        FROM bookings b
+                        JOIN properties p ON b.property_id = p.id
+                        WHERE b.id = ?";
 
-mysqli_stmt_close($update_stmt);
-}
-break;
+if ($stmt = mysqli_prepare($conn, $check_ownership_sql)) {
+    mysqli_stmt_bind_param($stmt, "i", $booking_id);
 
-case "cancel":
-                    // Update booking status to cancelled
+    if (mysqli_stmt_execute($stmt)) {
+        $result = mysqli_stmt_get_result($stmt);
+
+        if ($booking = mysqli_fetch_assoc($result)) {
+            if ($booking["owner_id"] != $user_id) {
+                $response = array(
+                    "success" => false,
+                    "message" => "Vous n'avez pas les droits pour modifier cette réservation."
+                );
+                echo json_encode($response);
+                exit;
+            }
+
+            switch ($action) {
+                case "confirm":
+                    $update_sql = "UPDATE bookings SET status = 'confirmed' WHERE id = ?";
+
+                    if ($update_stmt = mysqli_prepare($conn, $update_sql)) {
+                        mysqli_stmt_bind_param($update_stmt, "i", $booking_id);
+
+                        if (mysqli_stmt_execute($update_stmt)) {
+                            $response = array(
+                                "success" => true,
+                                "message" => "Réservation confirmée avec succès."
+                            );
+                            echo json_encode($response);
+                        } else {
+                            $response = array(
+                                "success" => false,
+                                "message" => "Erreur lors de la confirmation de la réservation."
+                            );
+                            echo json_encode($response);
+                        }
+
+                        mysqli_stmt_close($update_stmt);
+                    }
+                    break;
+
+                case "cancel":
                     $update_sql = "UPDATE bookings SET status = 'cancelled' WHERE id = ?";
 
                     if ($update_stmt = mysqli_prepare($conn, $update_sql)) {
@@ -76,4 +107,48 @@ case "cancel":
                 default:
                     $response = array(
                         "success" => false,
+                        "message" => "Action non reconnue."
+                    );
+                    echo json_encode($response);
+                    break;
+            }
+        } else {
+            $response = array(
+                "success" => false,
+                "message" => "Réservation introuvable."
+            );
+            echo json_encode($response);
+        }
+    } else {
+        $response = array(
+            "success" => false,
+            "message" => "Erreur de requête."
+        );
+        echo json_encode($response);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    mysqli_stmt_close($stmt);
+
+
+
+
+
+
+
 
