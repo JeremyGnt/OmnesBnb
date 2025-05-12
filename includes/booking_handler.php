@@ -1,0 +1,79 @@
+<?php
+
+require_once "db_connection.php";
+
+session_start();
+if (!isset($_SESSION["user_id"])) {
+    $response = array(
+        "success" => false,
+        "message" => "Vous devez être connecté pour effectuer cette action."
+    );
+    echo json_encode($response);
+    exit;
+}
+
+if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+    $response = array(
+        "success" => false,
+        "message" => "Méthode non autorisée."
+    );
+    echo json_encode($response);
+    exit;
+}
+
+$user_id = $_SESSION["user_id"];
+
+$booking_id = isset($_POST["booking_id"]) ? intval($_POST["booking_id"]) : 0;
+$action = isset($_POST["action"]) ? $_POST["action"] : "";
+
+if ($booking_id <= 0 || empty($action)) {
+    $response = array(
+        "success" => false,
+        "message" => "Paramètres manquants ou invalides."
+    );
+    echo json_encode($response);
+    exit;
+}
+);
+echo json_encode($response);
+} else {
+    $response = array(
+        "success" => false,
+        "message" => "Erreur lors de la confirmation de la réservation."
+    );
+    echo json_encode($response);
+}
+
+mysqli_stmt_close($update_stmt);
+}
+break;
+
+case "cancel":
+                    // Update booking status to cancelled
+                    $update_sql = "UPDATE bookings SET status = 'cancelled' WHERE id = ?";
+
+                    if ($update_stmt = mysqli_prepare($conn, $update_sql)) {
+                        mysqli_stmt_bind_param($update_stmt, "i", $booking_id);
+
+                        if (mysqli_stmt_execute($update_stmt)) {
+                            $response = array(
+                                "success" => true,
+                                "message" => "Réservation annulée avec succès."
+                            );
+                            echo json_encode($response);
+                        } else {
+                            $response = array(
+                                "success" => false,
+                                "message" => "Erreur lors de l'annulation de la réservation."
+                            );
+                            echo json_encode($response);
+                        }
+
+                        mysqli_stmt_close($update_stmt);
+                    }
+                    break;
+
+                default:
+                    $response = array(
+                        "success" => false,
+
