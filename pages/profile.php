@@ -294,3 +294,157 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
     mysqli_close($conn);
 }
 ?>
+
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="profile-header text-center">                <div id="profile_preview">
+                    <img src="../<?php echo htmlspecialchars($profile_image); ?>" alt="Photo de profil" class="profile-avatar mb-3">
+                </div>
+                <h4><?php echo htmlspecialchars($first_name) . ' ' . htmlspecialchars($last_name); ?></h4>
+                <p class="text-muted"><?php echo htmlspecialchars($email); ?></p>
+                <div class="list-group mt-4">
+                    <a href="#profile-info" class="list-group-item list-group-item-action active" data-bs-toggle="list">
+                        <i class="fas fa-user me-2"></i> Informations personnelles
+                    </a>
+                    <a href="messages.php" class="list-group-item list-group-item-action">
+                        <i class="fas fa-envelope me-2"></i> Messages
+                    </a>
+                    <a href="#payment-methods" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                        <i class="fas fa-credit-card me-2"></i> Moyens de paiement
+                    </a>
+                    <a href="#notifications" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                        <i class="fas fa-bell me-2"></i> Notifications
+                    </a>
+                    <a href="#privacy" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                        <i class="fas fa-shield-alt me-2"></i> Confidentialité
+                    </a>                    <a href="#change-password" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                        <i class="fas fa-lock me-2"></i> Changer de mot de passe
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="form-card">
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="profile-info">
+                        <h3 class="mb-4">Informations personnelles</h3>
+
+                        <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post" enctype="multipart/form-data">
+                            <div class="mb-4">
+                                <label for="profile_image_upload" class="form-label d-block text-center">Photo de profil</label>
+                                <div class="text-center mb-3">
+                                    <img id="profile_image_preview" src="../<?php echo htmlspecialchars($profile_image); ?>" alt="Photo de profil" class="profile-avatar mb-2" style="cursor: pointer;" onclick="document.getElementById('profile_image').click();">
+                                    <div class="small text-muted">Cliquez sur l'image pour changer votre photo</div>
+                                </div>
+                                <input type="file" name="profile_image" id="profile_image" class="form-control d-none" accept="image/*" onchange="previewImage(this);">
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-floating">
+                                        <input type="text" name="first_name" class="form-control <?php echo (!empty($first_name_err)) ? 'is-invalid' : ''; ?>" value="<?php echo htmlspecialchars($first_name); ?>" id="first_name" placeholder="Prénom">
+                                        <label for="first_name">Prénom</label>
+                                        <div class="invalid-feedback">
+                                            <?php echo $first_name_err ?? ''; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="form-floating">
+                                        <input type="text" name="last_name" class="form-control <?php echo (!empty($last_name_err)) ? 'is-invalid' : ''; ?>" value="<?php echo htmlspecialchars($last_name); ?>" id="last_name" placeholder="Nom">
+                                        <label for="last_name">Nom</label>
+                                        <div class="invalid-feedback">
+                                            <?php echo $last_name_err ?? ''; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input type="text" name="username" class="form-control <?php echo (!empty($username_err)) ? 'is-invalid' : ''; ?>" value="<?php echo htmlspecialchars($username); ?>" id="username" placeholder="Nom d'utilisateur">
+                                <label for="username">Nom d'utilisateur</label>
+                                <div class="invalid-feedback">
+                                    <?php echo $username_err ?? ''; ?>
+                                </div>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input type="email" name="email" class="form-control <?php echo (!empty($email_err)) ? 'is-invalid' : ''; ?>" value="<?php echo htmlspecialchars($email); ?>" id="email" placeholder="nom@example.com">
+                                <label for="email">Adresse email</label>
+                                <div class="invalid-feedback">
+                                    <?php echo $email_err ?? ''; ?>
+                                </div>
+                                <div class="form-text">Utilisez une adresse email @omnesintervenant.com, @ece.fr ou @edu.ece.fr</div>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input type="tel" name="phone" class="form-control <?php echo (!empty($phone_err)) ? 'is-invalid' : ''; ?>" value="<?php echo htmlspecialchars($phone); ?>" id="phone" placeholder="Numéro de téléphone">
+                                <label for="phone">Numéro de téléphone</label>
+                                <div class="invalid-feedback">
+                                    <?php echo $phone_err ?? ''; ?>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="profile_image" class="form-label">Photo de profil</label>
+                                <input class="form-control" type="file" id="profile_image" name="profile_image" accept="image/*">
+                                <div class="form-text">Format JPG, PNG ou GIF. Max 5MB.</div>
+                            </div>
+
+                            <div class="d-grid mt-4">
+                                <button type="submit" class="btn btn-primary">Mettre à jour mon profil</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="tab-pane fade" id="change-password">
+                        <h3 class="mb-4">Changer de mot de passe</h3>
+
+                        <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+                            <div class="form-floating mb-3">
+                                <input type="password" name="current_password" class="form-control <?php echo (!empty($current_password_err)) ? 'is-invalid' : ''; ?>" id="current_password" placeholder="Mot de passe actuel">
+                                <label for="current_password">Mot de passe actuel</label>
+                                <div class="invalid-feedback">
+                                    <?php echo $current_password_err ?? ''; ?>
+                                </div>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input type="password" name="new_password" class="form-control <?php echo (!empty($new_password_err)) ? 'is-invalid' : ''; ?>" id="password" placeholder="Nouveau mot de passe">
+                                <label for="password">Nouveau mot de passe</label>
+                                <div class="invalid-feedback">
+                                    <?php echo $new_password_err ?? ''; ?>
+                                </div>
+
+                                <!-- Password strength meter -->
+                                <div class="mt-2">
+                                    <div class="progress">
+                                        <div id="password_strength" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-floating mb-3">
+                                <input type="password" name="confirm_password" class="form-control <?php echo (!empty($confirm_password_err)) ? 'is-invalid' : ''; ?>" id="confirm_password" placeholder="Confirmez le mot de passe">
+                                <label for="confirm_password">Confirmez le nouveau mot de passe</label>
+                                <div class="invalid-feedback">
+                                    <?php echo $confirm_password_err ?? ''; ?>
+                                </div>
+                            </div>
+
+                            <div class="d-grid mt-4">
+                                <button type="submit" class="btn btn-primary">Mettre à jour le mot de passe</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<?php include "../includes/footer.php"; ?>
+
+
