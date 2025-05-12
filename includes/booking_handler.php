@@ -126,29 +126,16 @@ if ($stmt = mysqli_prepare($conn, $check_ownership_sql)) {
         );
         echo json_encode($response);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     mysqli_stmt_close($stmt);
+} else {
+    $response = array(
+        "success" => false,
+        "message" => "Erreur de préparation de la requête."
+    );
+    echo json_encode($response);
+}
 
-
-
-
-
-
+mysqli_close($conn);
+?>
 
 
