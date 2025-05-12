@@ -247,12 +247,15 @@ $user = mysqli_fetch_assoc($user_result);
                 </div>
                 <div class="card-body">
                     <div class="d-flex justify-content-between mb-2">
+                        <span><?php echo htmlspecialchars($property['price']); ?>€ x <?php echo $nights; ?> nuits</span>
+                        <span><?php echo number_format($property['price'] * $nights, 2, ',', ' '); ?>€</span>
                     </div>
 
                     <hr>
 
                     <div class="d-flex justify-content-between mb-3">
                         <strong>Total</strong>
+                        <strong class="text-primary"><?php echo number_format($total_price, 2, ',', ' '); ?>€</strong>
                     </div>
 
                     <form method="post" action="">
@@ -273,6 +276,35 @@ $user = mysqli_fetch_assoc($user_result);
     </div>
 </div>
 
+    <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="termsModalLabel">Conditions générales</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>Conditions de réservation</h6>
+                    <p>En effectuant cette réservation, vous acceptez les conditions suivantes :</p>
+                    <ul>
+                        <li>Le paiement est dû au moment de la réservation.</li>
+                        <li>Les annulations sont gratuites jusqu'à 48 heures avant l'arrivée.</li>
+                        <li>Des frais peuvent s'appliquer pour les annulations tardives ou les non-présentations.</li>
+                        <li>L'heure d'arrivée est généralement à partir de 15h00 et l'heure de départ est avant 11h00, sauf indication contraire de l'hôte.</li>
+                        <li>Vous vous engagez à respecter les règles de la maison établies par l'hôte.</li>
+                    </ul>
+
+                    <h6>Politique de remboursement</h6>
+                    <p>Remboursement intégral pour les annulations effectuées dans les 48 heures suivant la réservation, si la date d'arrivée est dans plus de 14 jours.</p>
+                    <p>Remboursement de 50% pour les annulations effectuées au moins 7 jours avant la date d'arrivée.</p>
+                    <p>Aucun remboursement pour les annulations effectuées moins de 7 jours avant la date d'arrivée.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
 <?php include "../includes/footer.php"; ?>
