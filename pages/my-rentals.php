@@ -53,9 +53,6 @@
         </div>
     </div>
 
-
-
-
     <!-- Détails des cartes dashboard -->
     <div id="dashboard-details" class="mb-4" style="display: none;">
         <!-- Réservations details -->
@@ -158,5 +155,60 @@
                 </div>
             </div>
         </div>
+    </div>
+
+
+
+
+    <div class="tab-pane fade" id="history" role="tabpanel" aria-labelledby="history-tab">
+        <h3 class="mb-4">Historique des locations</h3>
+
+        <?php if (empty($past_rentals)): ?>
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Vous n'avez pas encore d'historique de location.
+            </div>
+        <?php else: ?>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th>Logement</th>
+                        <th>Emplacement</th>
+                        <th>Période</th>
+                        <th>Montant</th>
+                        <th>Rôle</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <?php foreach ($past_rentals as $rental): ?>
+                        <tr>
+                            <td>
+                                <a href="property-details.php?id=<?php echo $rental['id']; ?>"><?php echo $rental['title']; ?></a>
+                            </td>
+                            <td><?php echo $rental['location']; ?></td>
+                            <td>
+                                <?php echo date('d/m/Y', strtotime($rental['start_date'])); ?> -
+                                <?php echo date('d/m/Y', strtotime($rental['end_date'])); ?>
+                            </td>
+                            <td><?php echo $rental['total_price']; ?>€</td>
+                            <td>
+                                <?php if (isset($rental['as_owner']) && $rental['as_owner']): ?>
+                                    <span class="badge bg-primary">Propriétaire</span>
+                                <?php else: ?>
+                                    <span class="badge bg-secondary">Locataire</span>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <span class="badge bg-success">Terminé</span>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
