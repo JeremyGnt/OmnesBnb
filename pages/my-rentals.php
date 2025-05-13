@@ -1,7 +1,5 @@
 <?php
 ?>
-
-
 <div class="container py-4">
     <div class="row mb-4">
         <h3 class="mb-4">Tableau de bord</h3>
@@ -17,9 +15,6 @@
                 </div>
             </div>
         </div>
-
-
-
         <div class="col-md-3 mb-3">
             <div class="card border-0 shadow-sm h-100 dashboard-card" data-card="depenses">
                 <div class="card-body d-flex flex-column align-items-center">
@@ -32,9 +27,6 @@
                 </div>
             </div>
         </div>
-
-
-
         <div class="col-md-3 mb-3">
             <div class="card border-0 shadow-sm h-100 dashboard-card" data-card="proprietes">
                 <div class="card-body d-flex flex-column align-items-center">
@@ -47,9 +39,6 @@
                 </div>
             </div>
         </div>
-
-
-
         <div class="col-md-3 mb-3">
             <div class="card border-0 shadow-sm h-100 dashboard-card" data-card="reservations">
                 <div class="card-body d-flex flex-column align-items-center">
@@ -63,11 +52,6 @@
             </div>
         </div>
     </div>
-
-
-
-
-
     <!-- Détails des cartes dashboard -->
     <div id="dashboard-details" class="mb-4" style="display: none;">
         <!-- Réservations details -->
@@ -76,9 +60,6 @@
                 <div class="card-header bg-info bg-opacity-10 border-0">
                     <h5 class="mb-0 text-info"><i class="fas fa-calendar-check me-2"></i>Détails des réservations</h5>
                 </div>
-
-
-
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-4">
@@ -98,10 +79,6 @@
                                 </li>
                             </ul>
                         </div>
-
-
-
-
                         <div class="col-md-8">
                             <h6 class="mb-3">Réservations récentes</h6>
                             <div class="table-responsive">
@@ -231,10 +208,6 @@
         <?php endif; ?>
     </div>
 </div>
-
-
-
-
 <!-- Modal de confirmation pour activer/désactiver une propriété -->
 <div class="modal fade" id="togglePropertyModal" tabindex="-1" aria-labelledby="togglePropertyModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -253,5 +226,27 @@
         </div>
     </div>
 </div>
-
-
+<!-- Modal de confirmation pour supprimer une propriété -->
+<div class="modal fade" id="deletePropertyModal" tabindex="-1" aria-labelledby="deletePropertyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deletePropertyModalLabel">Confirmer la suppression</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-3">
+                    <i class="fas fa-exclamation-triangle fa-4x text-danger"></i>
+                </div>
+                <p id="deletePropertyModalText" class="text-center">Êtes-vous sûr de vouloir supprimer définitivement cette propriété ? Cette action est irréversible et supprimera également toutes les réservations associées.</p>
+                <p class="text-center fw-bold" id="propertyTitleToDelete"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteProperty">
+                    <i class="fas fa-trash-alt me-1"></i>Supprimer définitivement
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
