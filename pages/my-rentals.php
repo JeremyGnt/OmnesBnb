@@ -1,5 +1,7 @@
 <?php
 ?>
+
+
 <div class="container py-4">
     <div class="row mb-4">
         <h3 class="mb-4">Tableau de bord</h3>
@@ -15,6 +17,9 @@
                 </div>
             </div>
         </div>
+
+
+
         <div class="col-md-3 mb-3">
             <div class="card border-0 shadow-sm h-100 dashboard-card" data-card="depenses">
                 <div class="card-body d-flex flex-column align-items-center">
@@ -27,6 +32,9 @@
                 </div>
             </div>
         </div>
+
+
+
         <div class="col-md-3 mb-3">
             <div class="card border-0 shadow-sm h-100 dashboard-card" data-card="proprietes">
                 <div class="card-body d-flex flex-column align-items-center">
@@ -39,6 +47,9 @@
                 </div>
             </div>
         </div>
+
+
+
         <div class="col-md-3 mb-3">
             <div class="card border-0 shadow-sm h-100 dashboard-card" data-card="reservations">
                 <div class="card-body d-flex flex-column align-items-center">
@@ -53,6 +64,10 @@
         </div>
     </div>
 
+
+
+
+
     <!-- Détails des cartes dashboard -->
     <div id="dashboard-details" class="mb-4" style="display: none;">
         <!-- Réservations details -->
@@ -61,6 +76,9 @@
                 <div class="card-header bg-info bg-opacity-10 border-0">
                     <h5 class="mb-0 text-info"><i class="fas fa-calendar-check me-2"></i>Détails des réservations</h5>
                 </div>
+
+
+
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-4">
@@ -80,6 +98,10 @@
                                 </li>
                             </ul>
                         </div>
+
+
+
+
                         <div class="col-md-8">
                             <h6 class="mb-3">Réservations récentes</h6>
                             <div class="table-responsive">
@@ -157,9 +179,6 @@
         </div>
     </div>
 
-
-
-
     <div class="tab-pane fade" id="history" role="tabpanel" aria-labelledby="history-tab">
         <h3 class="mb-4">Historique des locations</h3>
 
@@ -213,6 +232,9 @@
     </div>
 </div>
 
+
+
+
 <!-- Modal de confirmation pour activer/désactiver une propriété -->
 <div class="modal fade" id="togglePropertyModal" tabindex="-1" aria-labelledby="togglePropertyModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -231,3 +253,5 @@
         </div>
     </div>
 </div>
+
+
