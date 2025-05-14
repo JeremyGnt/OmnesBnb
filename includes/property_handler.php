@@ -100,5 +100,73 @@ switch ($action) {
                 'message' => 'Erreur de préparation de la requête.'
             ]);
         }        break;
+    case 'delete':
+        $check_owner_sql = "SELECT owner_id FROM properties WHERE id = ?";
+        if ($check_stmt = mysqli_prepare($conn, $check_owner_sql)) {
+            mysqli_stmt_bind_param($check_stmt, "i", $property_id);
+
+            if (mysqli_stmt_execute($check_stmt)) {
+                $owner_result = mysqli_stmt_get_result($check_stmt);
+
+                if (mysqli_num_rows($owner_result) > 0) {
+                    $property_data = mysqli_fetch_assoc($owner_result);
+
+                    if ($property_data['owner_id'] == $user_id) {
+                        try {
+                            $delete_property_sql = "DELETE FROM properties WHERE id = ?";
+                            $stmt_property = mysqli_prepare($conn, $delete_property_sql);
+                            mysqli_stmt_bind_param($stmt_property, "i", $property_id);
+                            mysqli_stmt_execute($stmt_property);
+                            mysqli_stmt_close($stmt_property);
+
+                            mysqli_commit($conn);
+
+                            echo json_encode([
+                                'success' => true,
+                                'message' => 'La propriété a été supprimée avec succès.'
+                            ]);
+                        } catch (Exception $e) {
+                            mysqli_rollback($conn);
+
+                            echo json_encode([
+                                'success' => false,
+                                'message' => 'Une erreur est survenue lors de la suppression : ' . $e->getMessage()
+                            ]);
+                        }
+                    } else {
+                        echo json_encode([
+                            'success' => false,
+                            'message' => 'Vous n\'êtes pas autorisé à supprimer cette propriété.'
+                        ]);
+                    }
+                } else {
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Propriété introuvable.'
+                    ]);
+                }
+            } else {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Erreur lors de la vérification de la propriété.'
+                ]);
+            }
+            mysqli_stmt_close($check_stmt);
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Erreur de préparation de la requête.'
+            ]);
+        }
+        break;
+    default:
+        echo json_encode([
+            'success' => false,
+            'message' => 'Action non reconnue.'
+        ]);
+        break;
+}
+
+?>
 
 
