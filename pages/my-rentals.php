@@ -155,3 +155,36 @@
             </div>
         </div>
     </div>
+    <!-- Balance Card -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="card-title mb-0">Balance financière</h5>
+                            <p class="text-muted">Revenus moins dépenses</p>
+                        </div>
+                        <div>
+                            <h2 class="mb-0 <?php echo ($net_balance >= 0) ? 'text-success' : 'text-danger'; ?>">
+                                <?php echo number_format($net_balance, 2); ?>€
+                            </h2>
+                        </div>
+                    </div>
+                    <div class="progress mt-3" style="height: 10px;">
+                        <?php if ($net_balance >= 0): ?>
+                            <div class="progress-bar bg-success" role="progressbar"
+                                 style="width: <?php echo min(100, ($total_earned / max(1, $total_earned + $total_spent) * 100)); ?>%"
+                                 aria-valuenow="<?php echo min(100, ($total_earned / max(1, $total_earned + $total_spent) * 100)); ?>"
+                                 aria-valuemin="0" aria-valuemax="100"></div>
+                        <?php else: ?>
+                            <div class="progress-bar bg-danger" role="progressbar"
+                                 style="width: <?php echo min(100, ($total_spent / max(1, $total_earned + $total_spent) * 100)); ?>%"
+                                 aria-valuenow="<?php echo min(100, ($total_spent / max(1, $total_earned + $total_spent) * 100)); ?>"
+                                 aria-valuemin="0" aria-valuemax="100"></div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
