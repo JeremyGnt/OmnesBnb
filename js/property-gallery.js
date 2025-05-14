@@ -1,4 +1,4 @@
-/*document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function() {
 
     initImageCarousel();
 });
@@ -76,18 +76,5 @@ function initImageCarousel() {
             showSlide(newIndex);
         }
     });
-
-    function handleSwipe() {
-
-        if (touchEndX < touchStartX - 50) {
-            let newIndex = currentIndex + 1;
-            if (newIndex > maxIndex) newIndex = 0;
-            showSlide(newIndex);
-        } else if (touchEndX > touchStartX + 50) {
-            let newIndex = currentIndex - 1;
-            if (newIndex < 0) newIndex = maxIndex;
-            showSlide(newIndex);
-        }
-    }
-}*/
+}
 
