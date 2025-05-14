@@ -87,3 +87,15 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     };
+    const checkinDate = document.getElementById('checkin-date');
+    const checkoutDate = document.getElementById('checkout-date');
+    if (checkinDate) {
+        checkinDate.addEventListener('change', updateTotalPrice);
+    }
+
+    if (checkoutDate) {
+        checkoutDate.addEventListener('change', updateTotalPrice);
+    }
+    updateTotalPrice();
+});
+
