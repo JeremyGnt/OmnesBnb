@@ -383,3 +383,70 @@
         </div>
     </div>
 </div>
+
+<!-- Modal de confirmation pour activer/désactiver une propriété -->
+<div class="modal fade" id="togglePropertyModal" tabindex="-1" aria-labelledby="togglePropertyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="togglePropertyModalLabel">Confirmation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="togglePropertyModalText">Êtes-vous sûr de vouloir modifier le statut de cette propriété ?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" id="confirmToggleProperty">Confirmer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de notification pour les résultats des actions -->
+<div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="notificationModalLabel">Notification</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="notificationIcon" class="text-center mb-3">
+                </div>
+                <p id="notificationModalText" class="text-center">Action effectuée avec succès.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmation pour supprimer une propriété -->
+<div class="modal fade" id="deletePropertyModal" tabindex="-1" aria-labelledby="deletePropertyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deletePropertyModalLabel">Confirmer la suppression</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-3">
+                    <i class="fas fa-exclamation-triangle fa-4x text-danger"></i>
+                </div>
+                <p id="deletePropertyModalText" class="text-center">Êtes-vous sûr de vouloir supprimer définitivement cette propriété ? Cette action est irréversible et supprimera également toutes les réservations associées.</p>
+                <p class="text-center fw-bold" id="propertyTitleToDelete"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteProperty">
+                    <i class="fas fa-trash-alt me-1"></i>Supprimer définitivement
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="../js/my-rentals.js"></script>
+<?php include "../includes/footer.php"; ?>
