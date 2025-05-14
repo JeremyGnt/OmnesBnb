@@ -61,3 +61,29 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+    const updateTotalPrice = function() {
+        const checkinDate = document.getElementById('checkin-date');
+        const checkoutDate = document.getElementById('checkout-date');
+        const nightlyRate = document.getElementById('nightly-rate');
+        const totalPriceElement = document.getElementById('total-price');
+
+        if (checkinDate && checkoutDate && nightlyRate && totalPriceElement) {
+            const checkin = new Date(checkinDate.value);
+            const checkout = new Date(checkoutDate.value);
+            const pricePerNight = parseFloat(nightlyRate.dataset.price || 0);
+
+            if (!isNaN(checkin.getTime()) && !isNaN(checkout.getTime()) && checkout > checkin) {
+                const timeDiff = checkout.getTime() - checkin.getTime();
+                const nights = Math.ceil(timeDiff / (1000 * 3600 * 24));
+
+                const totalPrice = nights * pricePerNight;
+
+                totalPriceElement.textContent = totalPrice.toFixed(2) + ' €';
+
+                const totalPriceInput = document.getElementById('total-price-input');
+                if (totalPriceInput) {
+                    totalPriceInput.value = totalPrice.toFixed(2);
+                }
+            }
+        }
+    };
