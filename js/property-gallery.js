@@ -36,31 +36,58 @@ function initImageCarousel() {
 
         currentIndex = index;
     }
-    function calculateDays(start, end) {
-        const startDate = new Date(start);
-        const endDate = new Date(end);
-        const diffTime = Math.abs(endDate - startDate);
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        return diffDays;
+
+    if (prevBtn) {
+        prevBtn.addEventListener('click', function () {
+            let newIndex = currentIndex - 1;
+            if (newIndex < 0) newIndex = maxIndex;
+            showSlide(newIndex);
+        });
     }
 
-    function updateBookingCalculation() {
-        const checkIn = document.getElementById('check-in').value;
-        const checkOut = document.getElementById('check-out').value;
-        const pricePerNight = <?= $property['price'] ?>;
+    if (nextBtn) {
+        nextBtn.addEventListener('click', function () {
+            let newIndex = currentIndex + 1;
+            if (newIndex > maxIndex) newIndex = 0;
+            showSlide(newIndex);
+        });
+    }
 
-        if (checkIn && checkOut) {
-            const nights = calculateDays(checkIn, checkOut);
-            if (nights > 0) {
-                const subtotal = nights * pricePerNight;
+    indicators.forEach((indicator, index) => {
+        indicator.addEventListener('click', function () {
+            showSlide(index);
+        });
+    });
 
-                document.getElementById('nights-count').textContent = nights;
-                document.getElementById('subtotal').textContent = subtotal + '€';
-                document.getElementById('total-price').textContent = subtotal + '€';
-            }
+    thumbnails.forEach((thumbnail, index) => {
+        thumbnail.addEventListener('click', function () {
+            showSlide(index);
+        });
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowLeft') {
+            let newIndex = currentIndex - 1;
+            if (newIndex < 0) newIndex = maxIndex;
+            showSlide(newIndex);
+        } else if (e.key === 'ArrowRight') {
+            let newIndex = currentIndex + 1;
+            if (newIndex > maxIndex) newIndex = 0;
+            showSlide(newIndex);
+        }
+    });
+
+    function handleSwipe() {
+
+        if (touchEndX < touchStartX - 50) {
+            let newIndex = currentIndex + 1;
+            if (newIndex > maxIndex) newIndex = 0;
+            showSlide(newIndex);
+        } else if (touchEndX > touchStartX + 50) {
+            let newIndex = currentIndex - 1;
+            if (newIndex < 0) newIndex = maxIndex;
+            showSlide(newIndex);
         }
     }
-
-    document.getElementById('check-in').addEventListener('change', updateBookingCalculation);
-    document.getElementById('check-out').addEventListener('change', updateBookingCalculation);
 }*/
+
