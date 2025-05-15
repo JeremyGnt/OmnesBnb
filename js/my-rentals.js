@@ -77,3 +77,45 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('Bootstrap n\'est pas chargé correctement');
     }
 });
+
+const toggleButtons = document.querySelectorAll('.toggle-property');
+let currentButton = null;
+let currentPropertyId = null;
+let currentIsActive = null;
+let currentNewStatus = null;
+
+if (toggleButtons.length > 0) {
+    toggleButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            currentButton = this;
+            currentPropertyId = this.getAttribute('data-property-id');
+            currentIsActive = this.querySelector('i').classList.contains('fa-toggle-off');
+            currentNewStatus = currentIsActive ? 0 : 1; // 0 = inactive, 1 = active
+            const statusText = currentIsActive ? 'désactiver' : 'activer';
+
+            if (togglePropertyModal) {
+                // Mettre à jour le texte de la modale de confirmation
+                const modalText = document.getElementById('togglePropertyModalText');
+                if (modalText) {
+                    modalText.textContent = `Êtes-vous sûr de vouloir ${statusText} cette propriété ?`;
+                }
+
+                // Afficher la modale de confirmation
+                togglePropertyModal.show();
+            } else {
+                // Fallback si la modale n'est pas disponible
+                if (confirm(`Êtes-vous sûr de vouloir ${statusText} cette propriété ?`)) {
+                    togglePropertyAction();
+                }
+            }
+        });
+    });
+}
+
+// Gérer la confirmation de l'action depuis la modale
+const confirmToggleProperty = document.getElementById('confirmToggleProperty');
+if (confirmToggleProperty) {
+    confirmToggleProperty.addEventListener('click', function() {
+        togglePropertyAction();
+    });
+}
