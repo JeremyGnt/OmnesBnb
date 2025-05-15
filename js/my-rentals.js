@@ -224,4 +224,36 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
     }
+
+    const deleteButtons = document.querySelectorAll('.delete-property');
+    let propertyToDelete = null;
+    let propertyTitleToDelete = '';
+
+    if (deleteButtons.length > 0) {
+        deleteButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                propertyToDelete = this.getAttribute('data-property-id');
+                propertyTitleToDelete = this.getAttribute('data-property-title') || 'cette propriété';
+
+                if (deletePropertyModal) {
+                    const propertyTitleElement = document.getElementById('propertyTitleToDelete');
+                    if (propertyTitleElement) {
+                        propertyTitleElement.textContent = propertyTitleToDelete;
+                    }
+                    deletePropertyModal.show();
+                } else {
+                    if (confirm(`Êtes-vous sûr de vouloir supprimer "${propertyTitleToDelete}" ? Cette action est irréversible.`)) {
+                        deletePropertyAction();
+                    }
+                }
+            });
+        });
+    }
+    // Gérer la confirmation de suppression depuis la modale
+    const confirmDeleteProperty = document.getElementById('confirmDeleteProperty');
+    if (confirmDeleteProperty) {
+        confirmDeleteProperty.addEventListener('click', function() {
+            deletePropertyAction();
+        });
+    }
 });
