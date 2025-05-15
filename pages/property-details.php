@@ -359,7 +359,77 @@ if ($user_id) {
 </div>
 
 
+<script>
+    function calculateDays(start, end) {
+        const startDate = new Date(start);
+        const endDate = new Date(end);
+        const diffTime = Math.abs(endDate - startDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays;
+    }
 
+    function updateBookingCalculation() {
+        const checkIn = document.getElementById('check-in').value;
+        const checkOut = document.getElementById('check-out').value;
+        const pricePerNight = <?= $property['price'] ?>;
+
+        if (checkIn && checkOut) {
+            const nights = calculateDays(checkIn, checkOut);
+            if (nights > 0) {
+                const subtotal = nights * pricePerNight;
+
+                document.getElementById('nights-count').textContent = nights;
+                document.getElementById('subtotal').textContent = subtotal + '€';
+                document.getElementById('total-price').textContent = subtotal + '€';
+            }
+        }
+    }
+
+    document.getElementById('check-in').addEventListener('change', updateBookingCalculation);
+    document.getElementById('check-out').addEventListener('change', updateBookingCalculation);
+
+    const favoriteButton = document.querySelector('.favorite-button-lg');
+    if (favoriteButton) {
+        favoriteButton.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            const propertyId = this.dataset.propertyId;
+            const isFavorite = this.classList.contains('favorited');
+
+            this.classList.toggle('favorited');
+
+            if (isFavorite) {
+                this.innerHTML = '<i class="far fa-heart"></i> Ajouter aux favoris';
+            } else {
+                this.innerHTML = '<i class="fas fa-heart"></i> Retirer des favoris';
+            }
+
+            fetch('../includes/favorite_handler.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `property_id=${propertyId}&action=${isFavorite ? 'remove' : 'add'}`
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.success) {
+                        favoriteButton.classList.toggle('favorited');
+                        favoriteButton.innerHTML = isFavorite ?
+                            '<i class="fas fa-heart"></i> Retirer des favoris' :
+                            '<i class="far fa-heart"></i> Ajouter aux favoris';
+
+                        if (data.redirect) {
+                            window.location.href = data.redirect;
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });
+    }
+</script>
 <script src="../js/property-gallery.js"></script>
 
 <?php include_once "../includes/footer.php"; ?>
