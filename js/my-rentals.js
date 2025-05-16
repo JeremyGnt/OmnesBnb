@@ -369,4 +369,96 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+    function handleBookingAction(bookingId, action, buttonElement) {
+        fetch('../includes/booking_handler.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `booking_id=${bookingId}&action=${action}`
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const row = buttonElement.closest('tr');
+
+                    if (row) {
+                        // Mettre à jour le badge de statut
+                        const statusCell = row.querySelector('td:nth-child(4)'); // 4e cellule contient le statut
+                        if (statusCell) {
+                            if (action === 'confirm') {
+                                statusCell.innerHTML = '<span class="badge bg-success">Confirmé</span>';
+                            } else if (action === 'cancel') {
+                                statusCell.innerHTML = '<span class="badge bg-danger">Annulé</span>';
+                            }
+                        }
+                        // Mettre à jour les boutons d'action
+                        const actionsCell = row.querySelector('td:last-child');
+                        if (actionsCell) {
+                            if (action === 'confirm') {
+                                actionsCell.innerHTML = `
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-danger cancel-booking" data-booking-id="${bookingId}">
+                                        <i class="fas fa-times"></i> Annuler
+                                    </button>
+                                </div>
+                            `;
+                                // Réattacher l'écouteur d'événement au nouveau bouton
+                                const newCancelButton = actionsCell.querySelector('.cancel-booking');
+                                if (newCancelButton) {
+                                    newCancelButton.addEventListener('click', function() {
+                                        if (confirm('Êtes-vous sûr de vouloir annuler cette réservation ?')) {
+                                            handleBookingAction(bookingId, 'cancel', this);
+                                        }
+                                    });
+                                }
+                            } else if (action === 'cancel') {
+                                actionsCell.innerHTML = '<span class="text-muted">Aucune action disponible</span>';
+                            }
+                        }
+                    }
+                    // Afficher un message de succès
+                    if (notificationModal) {
+                        const iconElement = document.getElementById('notificationIcon');
+                        const messageElement = document.getElementById('notificationModalText');
+                        const titleElement = document.getElementById('notificationModalLabel');
+
+                        if (iconElement && messageElement && titleElement) {
+                            titleElement.textContent = 'Succès';
+                            iconElement.innerHTML = `<i class="fas fa-check-circle fa-4x text-success"></i>`;
+                            messageElement.textContent = data.message || `Réservation ${action === 'confirm' ? 'confirmée' : 'annulée'} avec succès.`;
+
+                            notificationModal.show();
+                        } else {
+                            alert(data.message || `Réservation ${action === 'confirm' ? 'confirmée' : 'annulée'} avec succès.`);
+                        }
+                    } else {
+                        alert(data.message || `Réservation ${action === 'confirm' ? 'confirmée' : 'annulée'} avec succès.`);
+                    }
+                } else {
+                    // Afficher un message d'erreur
+                    if (notificationModal) {
+                        const iconElement = document.getElementById('notificationIcon');
+                        const messageElement = document.getElementById('notificationModalText');
+                        const titleElement = document.getElementById('notificationModalLabel');
+
+                        if (iconElement && messageElement && titleElement) {
+                            titleElement.textContent = 'Erreur';
+                            iconElement.innerHTML = `<i class="fas fa-exclamation-circle fa-4x text-danger"></i>`;
+                            messageElement.textContent = data.message || `Une erreur est survenue lors de l'action sur la réservation.`;
+
+                            notificationModal.show();
+                        } else {
+                            alert(data.message || `Une erreur est survenue lors de l'action sur la réservation.`);
+                        }
+                    } else {
+                        alert(data.message || `Une erreur est survenue lors de l'action sur la réservation.`);
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Une erreur de réseau est survenue. Veuillez réessayer plus tard.');
+            });
+    }
 });
