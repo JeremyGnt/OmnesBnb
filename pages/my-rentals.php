@@ -1,13 +1,10 @@
 <?php
-
 require_once "../includes/db_connection.php";
 include "../includes/header.php";
 
-// Add specific CSS for my rentals page
 echo '<link rel="stylesheet" href="../css/my-rentals.css">';
 echo '<link rel="stylesheet" href="../css/dashboard.css">';
 
-// Check if the user is logged in
 if (!isset($_SESSION["user_id"])) {
     $_SESSION["message"] = "Vous devez vous connecter pour accéder à vos locations.";
     $_SESSION["message_type"] = "warning";
@@ -18,7 +15,6 @@ if (!isset($_SESSION["user_id"])) {
 // Récupérer les propriétés de l'utilisateur depuis la base de données
 $my_properties = [];
 $user_id = $_SESSION["user_id"];
-
 // Requête pour récupérer les propriétés de l'utilisateur
 $properties_sql = "SELECT p.*, 
                     (SELECT COUNT(*) FROM bookings WHERE property_id = p.id) as booking_count,
@@ -28,10 +24,8 @@ $properties_sql = "SELECT p.*,
 
 if ($stmt = mysqli_prepare($conn, $properties_sql)) {
     mysqli_stmt_bind_param($stmt, "i", $user_id);
-
     if (mysqli_stmt_execute($stmt)) {
         $result = mysqli_stmt_get_result($stmt);
-
         while ($property = mysqli_fetch_assoc($result)) {
             // Récupérer les réservations pour cette propriété
             $property['bookings'] = [];
@@ -52,14 +46,11 @@ if ($stmt = mysqli_prepare($conn, $properties_sql)) {
                         $property['bookings'][] = $booking;
                     }
                 }
-
                 mysqli_stmt_close($bookings_stmt);
             }
-
             $my_properties[] = $property;
         }
     }
-
     mysqli_stmt_close($stmt);
 }
 
@@ -79,7 +70,6 @@ if ($rented_stmt = mysqli_prepare($conn, $rented_sql)) {
 
     if (mysqli_stmt_execute($rented_stmt)) {
         $rented_result = mysqli_stmt_get_result($rented_stmt);
-
         while ($booking = mysqli_fetch_assoc($rented_result)) {
             $rented_property = [
                 'id' => $booking['property_id'],
@@ -94,12 +84,84 @@ if ($rented_stmt = mysqli_prepare($conn, $rented_sql)) {
                 'total_price' => $booking['total_price'],
                 'status' => $booking['status']
             ];
-
             $rented_properties[] = $rented_property;
         }
     }
-
     mysqli_stmt_close($rented_stmt);
+    // Récupérer les locations passées (en tant que propriétaire ou locataire)
+    $past_rentals = [];
+
+// Requête pour récupérer les locations passées où l'utilisateur était locataire
+    $past_tenant_sql = "SELECT b.*, p.title, p.location, p.price, p.main_image,
+                    u.first_name as owner_first_name, u.last_name as owner_last_name, u.id as owner_id
+                    FROM bookings b
+                    JOIN properties p ON b.property_id = p.id
+                    JOIN users u ON p.owner_id = u.id
+                    WHERE b.user_id = ? AND b.end_date < CURDATE()
+                    ORDER BY b.end_date DESC
+                    LIMIT 10";
+
+    if ($past_tenant_stmt = mysqli_prepare($conn, $past_tenant_sql)) {
+        mysqli_stmt_bind_param($past_tenant_stmt, "i", $user_id);
+
+        if (mysqli_stmt_execute($past_tenant_stmt)) {
+            $past_tenant_result = mysqli_stmt_get_result($past_tenant_stmt);
+            while ($booking = mysqli_fetch_assoc($past_tenant_result)) {
+                $past_rental = [
+                    'id' => $booking['property_id'],
+                    'title' => $booking['title'],
+                    'location' => $booking['location'],
+                    'owner_name' => $booking['owner_first_name'] . ' ' . $booking['owner_last_name'],
+                    'owner_id' => $booking['owner_id'],
+                    'price' => $booking['price'],
+                    'image' => $booking['main_image'],
+                    'start_date' => $booking['start_date'],
+                    'end_date' => $booking['end_date'],
+                    'total_price' => $booking['total_price'],
+                    'status' => 'completed',
+                    'as_owner' => false
+                ];
+                $past_rentals[] = $past_rental;
+            }
+        }
+        mysqli_stmt_close($past_tenant_stmt);
+    }
+
+// Requête pour récupérer les locations passées où l'utilisateur était propriétaire
+    $past_owner_sql = "SELECT b.*, p.title, p.location, p.price, p.main_image,
+                  u.first_name as tenant_first_name, u.last_name as tenant_last_name, u.id as tenant_id
+                  FROM bookings b
+                  JOIN properties p ON b.property_id = p.id
+                  JOIN users u ON b.user_id = u.id
+                  WHERE p.owner_id = ? AND b.end_date < CURDATE()
+                  ORDER BY b.end_date DESC
+                  LIMIT 10";
+
+    if ($past_owner_stmt = mysqli_prepare($conn, $past_owner_sql)) {
+        mysqli_stmt_bind_param($past_owner_stmt, "i", $user_id);
+
+        if (mysqli_stmt_execute($past_owner_stmt)) {
+            $past_owner_result = mysqli_stmt_get_result($past_owner_stmt);
+            while ($booking = mysqli_fetch_assoc($past_owner_result)) {
+                $past_rental = [
+                    'id' => $booking['property_id'],
+                    'title' => $booking['title'],
+                    'location' => $booking['location'],
+                    'tenant_name' => $booking['tenant_first_name'] . ' ' . $booking['tenant_last_name'],
+                    'tenant_id' => $booking['tenant_id'],
+                    'price' => $booking['price'],
+                    'image' => $booking['main_image'],
+                    'start_date' => $booking['start_date'],
+                    'end_date' => $booking['end_date'],
+                    'total_price' => $booking['total_price'],
+                    'status' => 'completed',
+                    'as_owner' => true
+                ];
+                $past_rentals[] = $past_rental;
+            }
+        }
+        mysqli_stmt_close($past_owner_stmt);
+    }
 }
 
 ?>
