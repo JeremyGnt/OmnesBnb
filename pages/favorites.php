@@ -58,3 +58,6 @@
     </div>
     <?php endif; ?>
 </div>
+<script src="../js/favorites.js"></script>
+
+<?php include_once "../includes/footer.php"; ?>
