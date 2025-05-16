@@ -1,4 +1,107 @@
 <?php
+
+require_once "../includes/db_connection.php";
+include "../includes/header.php";
+
+// Add specific CSS for my rentals page
+echo '<link rel="stylesheet" href="../css/my-rentals.css">';
+echo '<link rel="stylesheet" href="../css/dashboard.css">';
+
+// Check if the user is logged in
+if (!isset($_SESSION["user_id"])) {
+    $_SESSION["message"] = "Vous devez vous connecter pour accéder à vos locations.";
+    $_SESSION["message_type"] = "warning";
+    header("location: login.php");
+    exit;
+}
+
+// Récupérer les propriétés de l'utilisateur depuis la base de données
+$my_properties = [];
+$user_id = $_SESSION["user_id"];
+
+// Requête pour récupérer les propriétés de l'utilisateur
+$properties_sql = "SELECT p.*, 
+                    (SELECT COUNT(*) FROM bookings WHERE property_id = p.id) as booking_count,
+                    (SELECT SUM(total_price) FROM bookings WHERE property_id = p.id AND status = 'confirmed') as total_earned
+                    FROM properties p 
+                    WHERE p.owner_id = ?";
+
+if ($stmt = mysqli_prepare($conn, $properties_sql)) {
+    mysqli_stmt_bind_param($stmt, "i", $user_id);
+
+    if (mysqli_stmt_execute($stmt)) {
+        $result = mysqli_stmt_get_result($stmt);
+
+        while ($property = mysqli_fetch_assoc($result)) {
+            // Récupérer les réservations pour cette propriété
+            $property['bookings'] = [];
+            $bookings_sql = "SELECT b.*, u.first_name, u.last_name, u.username
+                            FROM bookings b
+                            JOIN users u ON b.user_id = u.id
+                            WHERE b.property_id = ? AND b.status != 'cancelled'";
+
+            if ($bookings_stmt = mysqli_prepare($conn, $bookings_sql)) {
+                mysqli_stmt_bind_param($bookings_stmt, "i", $property['id']);
+
+                if (mysqli_stmt_execute($bookings_stmt)) {
+                    $bookings_result = mysqli_stmt_get_result($bookings_stmt);
+
+                    while ($booking = mysqli_fetch_assoc($bookings_result)) {
+                        $booking['tenant_name'] = $booking['first_name'] . ' ' . $booking['last_name'];
+                        $booking['tenant_id'] = $booking['user_id'];
+                        $property['bookings'][] = $booking;
+                    }
+                }
+
+                mysqli_stmt_close($bookings_stmt);
+            }
+
+            $my_properties[] = $property;
+        }
+    }
+
+    mysqli_stmt_close($stmt);
+}
+
+$rented_properties = [];
+
+// Requête pour récupérer les propriétés louées par l'utilisateur
+$rented_sql = "SELECT b.*, p.title, p.location, p.price, p.main_image,
+                u.first_name as owner_first_name, u.last_name as owner_last_name, u.id as owner_id
+                FROM bookings b
+                JOIN properties p ON b.property_id = p.id
+                JOIN users u ON p.owner_id = u.id
+                WHERE b.user_id = ? AND b.status = 'confirmed' AND b.end_date >= CURDATE()
+                ORDER BY b.start_date ASC";
+
+if ($rented_stmt = mysqli_prepare($conn, $rented_sql)) {
+    mysqli_stmt_bind_param($rented_stmt, "i", $user_id);
+
+    if (mysqli_stmt_execute($rented_stmt)) {
+        $rented_result = mysqli_stmt_get_result($rented_stmt);
+
+        while ($booking = mysqli_fetch_assoc($rented_result)) {
+            $rented_property = [
+                'id' => $booking['property_id'],
+                'title' => $booking['title'],
+                'location' => $booking['location'],
+                'owner_name' => $booking['owner_first_name'] . ' ' . $booking['owner_last_name'],
+                'owner_id' => $booking['owner_id'],
+                'price' => $booking['price'],
+                'image' => $booking['main_image'],
+                'start_date' => $booking['start_date'],
+                'end_date' => $booking['end_date'],
+                'total_price' => $booking['total_price'],
+                'status' => $booking['status']
+            ];
+
+            $rented_properties[] = $rented_property;
+        }
+    }
+
+    mysqli_stmt_close($rented_stmt);
+}
+
 ?>
 <div class="container py-4">
     <div class="row mb-4">
