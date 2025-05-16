@@ -279,7 +279,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         const iconElement = document.getElementById('notificationIcon');
                         const messageElement = document.getElementById('notificationModalText');
                         const titleElement = document.getElementById('notificationModalLabel');
-
                         if (iconElement && messageElement && titleElement) {
                             // Définir le titre, l'icône et le message appropriés
                             titleElement.textContent = 'Succès';
@@ -306,7 +305,6 @@ document.addEventListener('DOMContentLoaded', function() {
                         const iconElement = document.getElementById('notificationIcon');
                         const messageElement = document.getElementById('notificationModalText');
                         const titleElement = document.getElementById('notificationModalLabel');
-
                         if (iconElement && messageElement && titleElement) {
                             // Définir le titre, l'icône et le message appropriés
                             titleElement.textContent = 'Erreur';
@@ -324,13 +322,11 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .catch(error => {
                 console.error('Error:', error);
-
                 if (notificationModal) {
                     // En cas d'erreur de réseau ou autre
                     const iconElement = document.getElementById('notificationIcon');
                     const messageElement = document.getElementById('notificationModalText');
                     const titleElement = document.getElementById('notificationModalLabel');
-
                     if (iconElement && messageElement && titleElement) {
                         titleElement.textContent = 'Erreur';
                         iconElement.innerHTML = `<i class="fas fa-exclamation-circle fa-4x text-danger"></i>`;
@@ -344,5 +340,33 @@ document.addEventListener('DOMContentLoaded', function() {
                     alert('Une erreur de réseau est survenue. Veuillez réessayer plus tard.');
                 }
             });
+    }
+
+    // Gestion des boutons de confirmation/annulation des réservations
+    const confirmButtons = document.querySelectorAll('.confirm-booking');
+    const cancelButtons = document.querySelectorAll('.cancel-booking');
+
+    // Ajouter des écouteurs d'événements pour les boutons de confirmation
+    if (confirmButtons.length > 0) {
+        confirmButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const bookingId = this.getAttribute('data-booking-id');
+                if (confirm('Êtes-vous sûr de vouloir confirmer cette réservation ?')) {
+                    handleBookingAction(bookingId, 'confirm', this);
+                }
+            });
+        });
+    }
+
+    // Ajouter des écouteurs d'événements pour les boutons d'annulation
+    if (cancelButtons.length > 0) {
+        cancelButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const bookingId = this.getAttribute('data-booking-id');
+                if (confirm('Êtes-vous sûr de vouloir annuler cette réservation ?')) {
+                    handleBookingAction(bookingId, 'cancel', this);
+                }
+            });
+        });
     }
 });
