@@ -164,7 +164,43 @@ if ($rented_stmt = mysqli_prepare($conn, $rented_sql)) {
     }
 }
 
+$total_earned = 0;
+$total_spent = 0;
+$total_bookings = 0;
+$active_listings = 0;
+
+foreach ($my_properties as $property) {
+    $active_listings++;
+    if(isset($property['bookings'])) {
+        foreach($property['bookings'] as $booking) {
+            $total_earned += $booking['total_price'];
+            $total_bookings++;
+        }
+    }
+    foreach ($property['bookings'] as $booking) {
+        if ($booking['status'] === 'confirmed' || $booking['status'] === 'completed') {
+            $total_earned += $booking['total_price'];
+        }
+    }
+}
+foreach ($rented_properties as $property) {
+    if ($property['status'] === 'confirmed' || $property['status'] === 'completed') {
+        $total_spent += $property['total_price'];
+    }
+}
+foreach ($past_rentals as $rental) {
+    if ($rental['status'] === 'completed') {
+        if (isset($rental['as_owner']) && $rental['as_owner']) {
+            $total_earned += $rental['total_price'];
+        } else {
+            $total_spent += $rental['total_price'];
+        }
+    }
+}
+
+$net_balance = $total_earned - $total_spent;
 ?>
+
 <div class="container py-4">
     <div class="row mb-4">
         <h3 class="mb-4">Tableau de bord</h3>
