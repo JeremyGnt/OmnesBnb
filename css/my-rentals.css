@@ -119,3 +119,137 @@
     letter-spacing: 0.5px;
     backdrop-filter: blur(4px);
 }
+/* Status colors */
+.status-active {
+    background-color: rgba(209, 231, 221, 0.9);
+    color: #0f5132;
+}
+
+.status-booked,
+.status-confirmed {
+    background-color: rgba(207, 244, 252, 0.9);
+    color: #055160;
+}
+
+.status-pending {
+    background-color: rgba(255, 243, 205, 0.9);
+    color: #664d03;
+}
+
+.status-cancelled,
+.status-expired {
+    background-color: rgba(248, 215, 218, 0.9);
+    color: #842029;
+}
+
+.status-completed {
+    background-color: rgba(212, 212, 212, 0.9);
+    color: #444;
+}
+
+/* Card styling */
+.card-item {
+    background-color: #f8f8f8;
+    border-radius: 8px;
+    padding: 12px;
+    margin-top: 10px;
+    border-left: 4px solid #ff5a5f;
+}
+
+/* Button group */
+.button-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 15px;
+}
+
+.button { /* Renamed for brevity */
+    border-radius: 20px;
+    padding: 6px 15px;
+    font-size: 0.9rem;
+    border: none;
+    cursor: pointer;
+}
+
+/* Tab navigation */
+.tab-navigation {
+    border-bottom: 2px solid #eee;
+    margin-bottom: 25px;
+}
+
+.tab-link { /* Renamed for brevity */
+    border: none;
+    color: #717171;
+    font-weight: 600;
+    padding: 12px 20px;
+    margin-right: 5px;
+    transition: all 0.3s ease;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+.tab-link.active {
+    color: #ff5a5f;
+    background-color: transparent;
+    border-bottom: 3px solid #ff5a5f;
+}
+
+.tab-link:hover:not(.active) {
+    color: #ff5a5f;
+    border-bottom: 3px solid rgba(255, 90, 95, 0.3);
+}
+
+/* Table */
+.data-table-wrapper {
+    border-radius: 5px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+}
+
+.data-table {
+    width: 100%;
+    margin-bottom: 0;
+    border-collapse: collapse;
+}
+
+.data-table thead {
+    background-color: #f8f8f8;
+}
+
+.data-table th {
+    padding: 15px;
+    font-weight: 600;
+    color: #333;
+    border-bottom: none;
+    text-align: left;
+}
+
+.data-table td {
+    padding: 15px;
+    vertical-align: middle;
+}
+
+/* Modal */
+.modal-container {
+    border-radius: 5px;
+    border: none;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.modal-header-section {
+    border-bottom: 2px solid #f8f9fa;
+    padding: 20px 25px;
+}
+
+.modal-body-section {
+    padding: 25px;
+}
+
+.modal-footer-section {
+    border-top: 2px solid #f8f9fa;
+    padding: 15px 25px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}
