@@ -175,51 +175,106 @@ body {
     transition: all 0.3s ease;
 }
 
+
+.hero-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.hero-btn-outline {
+    border-width: 2px;
+}
+
+.hero-btn-outline:hover {
+    background-color: rgba(255,255,255,0.1);
+}
+
+.hero-image-container {
+    position: relative;
+    height: 480px;
+}
+
+.hero-floating-card {
+    position: absolute;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+    overflow: hidden;
+    width: 280px;
+    transition: all 0.5s ease;
+}
+
+.hero-floating-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+
+.hero-card-1 {
+    top: 40px;
+    right: 20px;
+    z-index: 3;
+}
+
+.hero-card-2 {
+    bottom: 60px;
+    left: 10px;
+    z-index: 2;
+}
+
+.hero-card-image {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+}
+
+.hero-card-content {
+    padding: 15px;
+}
+
+.hero-card-rating {
+    color: #FF5A5F;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.hero-card-content h5 {
+    margin: 0 0 5px;
+    color: var(--secondary-color);
+    font-weight: 600;
+}
+
+.btn {
+    border-radius: 50px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
 .btn-primary:hover, .btn-primary:focus {
-    background-color: #E53F47;
-    border-color: #E53F47;
+    background-color: #e54853;
+    border-color: #e54853;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(255, 90, 95, 0.3);
 }
 
 .btn-outline-primary {
-    color: var(--primary-color);
     border-color: var(--primary-color);
+    color: var(--primary-color);
 }
 
 .btn-outline-primary:hover {
     background-color: var(--primary-color);
-    border-color: var(--primary-color);
+    color: white;
     transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 90, 95, 0.2);
 }
 
 .btn-lg {
     font-size: 1.1rem;
-    font-weight: 600;
-    padding: 1rem 2rem;
-}
-
-footer {
-    margin-top: auto;
-}
-
-@media (min-width: 768px) {
-    .property-image {
-        height: 250px;
-    }
-
-    .profile-avatar {
-        width: 150px;
-        height: 150px;
-    }
-}
-
-@media (min-width: 992px) {
-    .hero-section {
-        padding: 3rem 0;
-    }
-
-    .property-card {
-        margin-bottom: 2rem;
-    }
+    padding: 0.85rem 2rem;
 }
