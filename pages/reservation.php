@@ -1,5 +1,126 @@
 <?php
+
+require_once "../includes/db_connection.php";
+include "../includes/header.php";
+
+// CSS et JavaScript spécifiques à la page de réservation
+echo '<link rel="stylesheet" href="../css/reservation.css?v='.time().'">';
+echo '<script src="../js/reservation.js?v='.time().'" defer></script>';
+
+// Vérifier si l'utilisateur est connecté
+if (!isset($_SESSION["user_id"])) {
+    $_SESSION["message"] = "Vous devez vous connecter pour accéder à vos réservations.";
+    $_SESSION["message_type"] = "warning";
+    header("location: login.php");
+    exit;
+}
+
+$user_id = $_SESSION["user_id"];
+$active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'upcoming';
+
+// Traiter l'annulation d'une réservation
+if(isset($_GET['cancel']) && !empty($_GET['cancel'])) {
+    $reservation_id = $_GET['cancel'];
+
+    // Vérifier que la réservation appartient bien à l'utilisateur
+    $check_sql = "SELECT * FROM bookings WHERE id = ? AND user_id = ?";
+    if($stmt = mysqli_prepare($conn, $check_sql)) {
+        mysqli_stmt_bind_param($stmt, "ii", $reservation_id, $user_id);
+        if(mysqli_stmt_execute($stmt)) {
+            $result = mysqli_stmt_get_result($stmt);
+            if(mysqli_num_rows($result) > 0) {
+                // La réservation appartient à l'utilisateur, on peut l'annuler
+                $update_sql = "UPDATE bookings SET status = 'cancelled', updated_at = NOW() WHERE id = ?";
+                if($update_stmt = mysqli_prepare($conn, $update_sql)) {
+                    mysqli_stmt_bind_param($update_stmt, "i", $reservation_id);
+                    if(mysqli_stmt_execute($update_stmt)) {
+                        $_SESSION["message"] = "Réservation annulée avec succès.";
+                        $_SESSION["message_type"] = "success";
+                    } else {
+                        $_SESSION["message"] = "Erreur lors de l'annulation de la réservation.";
+                        $_SESSION["message_type"] = "danger";
+                    }
+                    mysqli_stmt_close($update_stmt);
+                }
+            } else {
+                $_SESSION["message"] = "Vous n'êtes pas autorisé à annuler cette réservation.";
+                $_SESSION["message_type"] = "danger";
+            }
+        }
+        mysqli_stmt_close($stmt);
+    }
+
+    // Rediriger pour éviter les soumissions multiples
+    header("location: reservation.php?tab=" . $active_tab);
+    exit;
+}
+
+// Récupérer les réservations à venir de l'utilisateur
+$upcoming_reservations = [];
+$upcoming_sql = "SELECT b.*, p.title, p.main_image, p.location, p.price, u.username as owner_name, u.id as owner_id 
+                 FROM bookings b 
+                 JOIN properties p ON b.property_id = p.id 
+                 JOIN users u ON p.owner_id = u.id 
+                 WHERE b.user_id = ? 
+                 AND (b.status = 'confirmed' OR b.status = 'pending')
+                 AND b.end_date >= CURRENT_DATE() 
+                 ORDER BY b.start_date ASC";
+
+if($stmt = mysqli_prepare($conn, $upcoming_sql)) {
+    mysqli_stmt_bind_param($stmt, "i", $user_id);
+    if(mysqli_stmt_execute($stmt)) {
+        $result = mysqli_stmt_get_result($stmt);
+        while($row = mysqli_fetch_assoc($result)) {
+            $upcoming_reservations[] = $row;
+        }
+    }
+    mysqli_stmt_close($stmt);
+}
+
+// Récupérer les réservations passées de l'utilisateur
+$past_reservations = [];
+$past_sql = "SELECT b.*, p.title, p.main_image, p.location, p.price, u.username as owner_name, u.id as owner_id
+             FROM bookings b 
+             JOIN properties p ON b.property_id = p.id 
+             JOIN users u ON p.owner_id = u.id 
+             WHERE b.user_id = ? 
+             AND b.status = 'confirmed' 
+             AND b.end_date < CURRENT_DATE() 
+             ORDER BY b.end_date DESC";
+
+if($stmt = mysqli_prepare($conn, $past_sql)) {
+    mysqli_stmt_bind_param($stmt, "i", $user_id);
+    if(mysqli_stmt_execute($stmt)) {
+        $result = mysqli_stmt_get_result($stmt);
+        while($row = mysqli_fetch_assoc($result)) {
+            $past_reservations[] = $row;
+        }
+    }
+    mysqli_stmt_close($stmt);
+}
+
+// Récupérer les réservations annulées
+$cancelled_reservations = [];
+$cancelled_sql = "SELECT b.*, p.title, p.main_image, p.location, p.price, u.username as owner_name, u.id as owner_id 
+                  FROM bookings b
+                  JOIN properties p ON b.property_id = p.id 
+                  JOIN users u ON p.owner_id = u.id 
+                  WHERE b.user_id = ? 
+                  AND b.status = 'cancelled' 
+                  ORDER BY b.updated_at DESC";
+
+if($stmt = mysqli_prepare($conn, $cancelled_sql)) {
+    mysqli_stmt_bind_param($stmt, "i", $user_id);
+    if(mysqli_stmt_execute($stmt)) {
+        $result = mysqli_stmt_get_result($stmt);
+        while($row = mysqli_fetch_assoc($result)) {
+            $cancelled_reservations[] = $row;
+        }
+    }
+    mysqli_stmt_close($stmt);
+}
 ?>
+
 <div class="container py-4">
     <div class="text-center mb-5">
         <h1 class="display-4 fw-bold mb-2">Mes réservations</h1>
