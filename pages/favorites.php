@@ -1,4 +1,62 @@
 <?php
+
+require_once "../includes/db_connection.php";
+include "../includes/header.php";
+
+echo '<link rel="stylesheet" href="../omnesbnb-equipe-2h/css/favorites.css">';
+
+if (!isset($_SESSION["user_id"])) {
+    $_SESSION["message"] = "Vous devez vous connecter pour accéder à vos favoris.";
+    $_SESSION["message_type"] = "warning";
+    header("location: login.php");
+    exit;
+}
+
+if(isset($_GET["remove"]) && !empty($_GET["remove"])) {
+    $property_id = $_GET["remove"];
+    $user_id = $_SESSION["user_id"];
+
+    $sql = "DELETE FROM favorites WHERE user_id = ? AND property_id = ?";
+    if($stmt = mysqli_prepare($conn, $sql)) {
+        mysqli_stmt_bind_param($stmt, "ii", $user_id, $property_id);
+
+        if(mysqli_stmt_execute($stmt)) {
+            $_SESSION["message"] = "Propriété supprimée des favoris avec succès.";
+            $_SESSION["message_type"] = "success";
+
+            $activity_sql = "INSERT INTO user_activity (user_id, activity_type, property_id) VALUES (?, 'favorite_remove', ?)";
+            $activity_stmt = mysqli_prepare($conn, $activity_sql);
+            mysqli_stmt_bind_param($activity_stmt, "ii", $user_id, $property_id);
+            mysqli_stmt_execute($activity_stmt);
+
+            header("location: favorites.php");
+            exit;
+        } else {
+            $_SESSION["message"] = "Une erreur est survenue. Veuillez réessayer.";
+            $_SESSION["message_type"] = "danger";
+        }
+        mysqli_stmt_close($stmt);
+    }
+}
+$user_id = $_SESSION["user_id"];
+$favorites = [];
+
+$sql = "SELECT p.*, f.created_at AS favorite_date 
+        FROM properties p 
+        JOIN favorites f ON p.id = f.property_id 
+        WHERE f.user_id = ? 
+        ORDER BY f.created_at DESC";
+
+if($stmt = mysqli_prepare($conn, $sql)) {
+    mysqli_stmt_bind_param($stmt, "i", $user_id);
+    if(mysqli_stmt_execute($stmt)) {
+        $result = mysqli_stmt_get_result($stmt);
+        while($row = mysqli_fetch_assoc($result)) {
+            $favorites[] = $row;
+        }
+    }
+    mysqli_stmt_close($stmt);
+}
 ?>
 <div class="container py-4">
     <h1 class="mb-4">Mes favoris</h1>
