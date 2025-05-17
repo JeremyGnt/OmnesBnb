@@ -1,4 +1,106 @@
 <?php
+
+require_once "../includes/db_connection.php";
+include_once "../includes/header.php";
+
+echo '<link rel="stylesheet" href="../css/search.css">';
+
+$user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+
+$location = isset($_GET['location']) ? mysqli_real_escape_string($conn, $_GET['location']) : '';
+$check_in = isset($_GET['check_in']) ? mysqli_real_escape_string($conn, $_GET['check_in']) : '';
+$check_out = isset($_GET['check_out']) ? mysqli_real_escape_string($conn, $_GET['check_out']) : '';
+$guests = isset($_GET['guests']) ? (int)$_GET['guests'] : 1;
+$property_type = isset($_GET['property_type']) ? mysqli_real_escape_string($conn, $_GET['property_type']) : '';
+$min_price = isset($_GET['min_price']) ? (float)$_GET['min_price'] : 0;
+$max_price = isset($_GET['max_price']) ? (float)$_GET['max_price'] : 1000;
+$min_rooms = isset($_GET['min_rooms']) ? (int)$_GET['min_rooms'] : 1;
+
+$sql = "SELECT p.*, 
+        (SELECT COUNT(*) FROM favorites WHERE property_id = p.id AND user_id = ?) AS is_favorite
+        FROM properties p WHERE is_published = TRUE";
+
+$params = [$user_id];
+$types = "i";
+
+if (!empty($location)) {
+    $sql .= " AND (city LIKE ? OR location LIKE ?)";
+    $params[] = "%$location%";
+    $params[] = "%$location%";
+    $types .= "ss";
+}
+
+if (!empty($property_type)) {
+    $sql .= " AND property_type = ?";
+    $params[] = $property_type;
+    $types .= "s";
+}
+
+if (!empty($check_in) && !empty($check_out)) {
+    $sql .= " AND p.id NOT IN (
+                SELECT property_id FROM bookings 
+                WHERE (start_date <= ? AND end_date >= ?) 
+                OR (start_date <= ? AND end_date >= ?) 
+                OR (start_date >= ? AND end_date <= ?)
+                AND status = 'confirmed'
+             )";
+    $params[] = $check_out;
+    $params[] = $check_in;
+    $params[] = $check_in;
+    $params[] = $check_out;
+    $params[] = $check_in;
+    $params[] = $check_out;
+    $types .= "ssssss";
+}
+
+$sql .= " AND max_guests >= ?";
+$params[] = $guests;
+$types .= "i";
+
+$sql .= " AND price BETWEEN ? AND ?";
+$params[] = $min_price;
+$params[] = $max_price;
+$types .= "dd";
+
+$sql .= " AND rooms >= ?";
+$params[] = $min_rooms;
+$types .= "i";
+
+$sql .= " ORDER BY price ASC";
+
+$stmt = mysqli_prepare($conn, $sql);
+
+mysqli_stmt_bind_param($stmt, $types, ...$params);
+mysqli_stmt_execute($stmt);
+
+$result = mysqli_stmt_get_result($stmt);
+$count = mysqli_num_rows($result);
+
+function getPropertyMainImage($conn, $property_id, $main_image) {
+    if (!empty($main_image) && file_exists("../" . $main_image)) {
+        return $main_image;
+    }
+
+    // Try to get first image from property_images table
+    $img_sql = "SELECT image_path FROM property_images WHERE property_id = ? LIMIT 1";
+    $img_stmt = mysqli_prepare($conn, $img_sql);
+    mysqli_stmt_bind_param($img_stmt, "i", $property_id);
+    mysqli_stmt_execute($img_stmt);
+    $img_result = mysqli_stmt_get_result($img_stmt);
+
+    if ($img_row = mysqli_fetch_assoc($img_result)) {
+        return $img_row['image_path'];
+    }
+    return "assets/property_images/default.jpg";
+}
+
+$cities_query = "SELECT DISTINCT city FROM properties WHERE is_published = TRUE ORDER BY city";
+$cities_result = mysqli_query($conn, $cities_query);
+
+$max_price_query = "SELECT MAX(price) as max_price FROM properties";
+$max_price_result = mysqli_query($conn, $max_price_query);
+$max_price_row = mysqli_fetch_assoc($max_price_result);
+$db_max_price = $max_price_row['max_price'];
 ?>
 <div class="container search-page my-4">
     <h1 class="mb-4">Trouver un logement</h1>
