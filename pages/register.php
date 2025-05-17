@@ -1,233 +1,139 @@
 <?php
-
 require_once "../includes/db_connection.php";
 include "../includes/header.php";
 
-// Si session deja ouverte
-if(isset($_SESSION["user_id"])){
+if (isset($_SESSION["user_id"])) {
     header("location: ../index.php");
     exit;
 }
 
-// variables nulles
 $email = $password = $confirm_password = $first_name = $last_name = "";
-$email_err = $password_err = $confirm_password_err = $first_name_err = $last_name_err = $terms_err= "";
+$email_err = $password_err = $confirm_password_err = $first_name_err = $last_name_err = $terms_err = "";
 
-if($_SERVER["REQUEST_METHOD"] == "POST"){
-
-
-    if(empty(trim($_POST["email"]))){
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    if (empty(trim($_POST["email"]))) {
         $email_err = "Veuillez entrer un email.";
-    } else{
-
+    } else {
         $email = trim($_POST["email"]);
-        if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $email_err = "Format d'email invalide.";
+        } elseif (!preg_match("/@(omnesintervenant\.com|ece\.fr|edu\.ece\.fr)$/", $email)) {
+            $email_err = "Seules les adresses email d'Omnes sont autorisées.";
         } else {
-
-            if(!preg_match("/@(omnesintervenant\.com|ece\.fr|edu\.ece\.fr)$/", $email)){
-                $email_err = "Seules les adresses email d'Omnes sont autorisées.";
-            } else {
-
-                $sql = "SELECT id FROM users WHERE email = ?";
-
-                if($stmt = mysqli_prepare($conn, $sql)){
-                    mysqli_stmt_bind_param($stmt, "s", $param_email);
-                    $param_email = $email;
-
-                    if(mysqli_stmt_execute($stmt)){
-                        mysqli_stmt_store_result($stmt);
-
-                        if(mysqli_stmt_num_rows($stmt) == 1){
-                            $email_err = "Cette adresse email est déjà utilisée.";
-                        }
-                    } else{
-                        echo "Oops! Une erreur est survenue. Veuillez réessayer plus tard.";
+            $sql = "SELECT id FROM users WHERE email = ?";
+            if ($stmt = mysqli_prepare($conn, $sql)) {
+                mysqli_stmt_bind_param($stmt, "s", $param_email);
+                $param_email = $email;
+                if (mysqli_stmt_execute($stmt)) {
+                    mysqli_stmt_store_result($stmt);
+                    if (mysqli_stmt_num_rows($stmt) == 1) {
+                        $email_err = "Cette adresse email est déjà utilisée.";
                     }
-
-                    mysqli_stmt_close($stmt);
                 }
+                mysqli_stmt_close($stmt);
             }
         }
     }
 
-
-    if(empty(trim($_POST["first_name"]))){
+    if (empty(trim($_POST["first_name"]))) {
         $first_name_err = "Veuillez entrer votre prénom.";
-    } else{
+    } else {
         $first_name = trim($_POST["first_name"]);
     }
 
-
-    if(empty(trim($_POST["last_name"]))){
+    if (empty(trim($_POST["last_name"]))) {
         $last_name_err = "Veuillez entrer votre nom.";
-    } else{
+    } else {
         $last_name = trim($_POST["last_name"]);
     }
 
-
-    if(empty(trim($_POST["password"]))){
+    if (empty(trim($_POST["password"]))) {
         $password_err = "Veuillez entrer un mot de passe.";
-    } elseif(strlen(trim($_POST["password"])) < 8){
+    } elseif (strlen(trim($_POST["password"])) < 8) {
         $password_err = "Le mot de passe doit contenir au moins 8 caractères.";
-    } else{
+    } else {
         $password = trim($_POST["password"]);
     }
 
-
-    if(empty(trim($_POST["confirm_password"]))){
+    if (empty(trim($_POST["confirm_password"]))) {
         $confirm_password_err = "Veuillez confirmer le mot de passe.";
-    } else{
+    } else {
         $confirm_password = trim($_POST["confirm_password"]);
-        if(empty($password_err) && ($password != $confirm_password)){
+        if (empty($password_err) && ($password != $confirm_password)) {
             $confirm_password_err = "Les mots de passe ne correspondent pas.";
         }
     }
-    //cocher case CGU
+
     if (!isset($_POST['terms'])) {
         $terms_err = "Vous devez accepter les conditions pour vous inscrire.";
     }
 
-
-
-    if(empty($email_err) && empty($password_err) && empty($confirm_password_err) && empty($first_name_err) && empty($last_name_err) && empty($terms_err)){
-
-
-        $user_type = 'student'; // Default
-        if(preg_match("/@ece\.fr$/", $email)) {
-            $user_type = 'staff';
-        } elseif(preg_match("/@omnesintervenant\.com$/", $email)) {
-            $user_type = 'staff';
-        }
-
-
+    if (empty($email_err) && empty($password_err) && empty($confirm_password_err) && empty($first_name_err) && empty($last_name_err) && empty($terms_err)) {
+        $user_type = preg_match("/@(ece\.fr|omnesintervenant\.com)$/", $email) ? 'staff' : 'student';
         $sql = "INSERT INTO users (email, password, first_name, last_name, user_type, is_verified) VALUES (?, ?, ?, ?, ?, FALSE)";
-
-        if($stmt = mysqli_prepare($conn, $sql)){
-
+        if ($stmt = mysqli_prepare($conn, $sql)) {
             mysqli_stmt_bind_param($stmt, "sssss", $param_email, $param_password, $param_first_name, $param_last_name, $param_user_type);
-
-
             $param_email = $email;
-            $param_password = password_hash($password, PASSWORD_DEFAULT); // Creates a password hash
+            $param_password = password_hash($password, PASSWORD_DEFAULT);
             $param_first_name = $first_name;
             $param_last_name = $last_name;
             $param_user_type = $user_type;
-
-
-            if(mysqli_stmt_execute($stmt)){
-
+            if (mysqli_stmt_execute($stmt)) {
                 $_SESSION['message'] = "Inscription réussie. Vous pouvez maintenant vous connecter.";
                 $_SESSION['message_type'] = "success";
                 header("location: login.php");
-            } else{
-                echo "Oops! Une erreur est survenue. Veuillez réessayer plus tard.";
             }
-
-
             mysqli_stmt_close($stmt);
         }
     }
-
 
     mysqli_close($conn);
 }
 ?>
 
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="form-card">
-                <h2 class="text-center mb-4">Inscription</h2>
-                <p class="text-center">Créez votre compte OmnesBnB avec votre adresse email Omnes</p>
+<link rel="stylesheet" href="../css/register.css">
 
-                <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post" class="needs-validation" novalidate>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <div class="form-floating">
-                                <input type="text" name="first_name" class="form-control <?php echo (!empty($first_name_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $first_name; ?>" id="first_name" placeholder="Prénom">
-                                <label for="first_name">Prénom</label>
-                                <div class="invalid-feedback">
-                                    <?php echo $first_name_err; ?>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <div class="form-floating">
-                                <input type="text" name="last_name" class="form-control <?php echo (!empty($last_name_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $last_name; ?>" id="last_name" placeholder="Nom">
-                                <label for="last_name">Nom</label>
-                                <div class="invalid-feedback">
-                                    <?php echo $last_name_err; ?>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+<div class="container">
+    <div class="form-card">
+        <h2>Inscription</h2>
+        <p>Créez votre compte OmnesBnB avec une adresse Omnes</p>
+        <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
+            <label>Prénom :
+                <input type="text" name="first_name" value="<?php echo $first_name; ?>">
+                <span class="error"><?php echo $first_name_err; ?></span>
+            </label>
 
-                    <div class="form-floating mb-3">
-                        <input type="email" name="email" class="form-control <?php echo (!empty($email_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $email; ?>" id="email" placeholder="nom@example.com">
-                        <label for="email">Adresse email Omnes</label>
-                        <div class="invalid-feedback">
-                            <?php echo $email_err; ?>
-                        </div>
-                        <div class="form-text">Utilisez votre adresse email @omnesintervenant.com, @ece.fr ou @edu.ece.fr</div>
-                    </div>
+            <label>Nom :
+                <input type="text" name="last_name" value="<?php echo $last_name; ?>">
+                <span class="error"><?php echo $last_name_err; ?></span>
+            </label>
 
-                    <div class="form-floating mb-3">
-                        <input type="password" name="password" class="form-control <?php echo (!empty($password_err)) ? 'is-invalid' : ''; ?>" id="password" placeholder="Mot de passe">
-                        <label for="password">Mot de passe</label>
-                        <div class="invalid-feedback">
-                            <?php echo $password_err; ?>
-                        </div>
-                    </div>
+            <label>Email :
+                <input type="email" name="email" value="<?php echo $email; ?>">
+                <span class="error"><?php echo $email_err; ?></span>
+            </label>
 
-                    <div class="form-floating mb-3">
-                        <input type="password" name="confirm_password" class="form-control <?php echo (!empty($confirm_password_err)) ? 'is-invalid' : ''; ?>" id="confirm_password" placeholder="Confirmez le mot de passe">
-                        <label for="confirm_password">Confirmez le mot de passe</label>
-                        <div class="invalid-feedback">
-                            <?php echo $confirm_password_err; ?>
-                        </div>
-                    </div>
+            <label>Mot de passe :
+                <input type="password" name="password">
+                <span class="error"><?php echo $password_err; ?></span>
+            </label>
 
-                    <div class="form-check mb-3">
-                        <input class="form-check-input <?php echo (!empty($terms_err)) ? 'is-invalid' : ''; ?>" type="checkbox" name="terms" value="1" id="terms">
-                        <label class="form-check-label" for="terms">
-                            J'accepte les <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal">conditions générales d'utilisation</a>
-                        </label>
-                        <div class="invalid-feedback">
-                            <?php echo $terms_err; ?>
-                        </div>
-                    </div>
+            <label>Confirmer le mot de passe :
+                <input type="password" name="confirm_password">
+                <span class="error"><?php echo $confirm_password_err; ?></span>
+            </label>
 
-                    <div class="d-grid mb-3">
-                        <button type="submit" class="btn btn-primary btn-lg">S'inscrire</button>
-                    </div>
+            <label class="checkbox">
+                <input type="checkbox" name="terms" value="1">
+                J'accepte les <a href="#">conditions générales d'utilisation</a>
+                <span class="error"><?php echo $terms_err; ?></span>
+            </label>
 
-                    <p class="text-center">Vous avez déjà un compte? <a href="login.php">Connectez-vous ici</a></p>
-                </form>
-            </div>
-        </div>
+            <button type="submit">S'inscrire</button>
+
+            <p class="link">Vous avez déjà un compte ? <a href="login.php">Connectez-vous ici</a></p>
+        </form>
     </div>
 </div>
-
-<!-- Condition d'utilisation -->
-<div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-scrollable">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="termsModalLabel">Conditions générales d'utilisation</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <h6>1. Acceptation des conditions</h6>
-
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
 
 <?php include "../includes/footer.php"; ?>
