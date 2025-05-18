@@ -50,3 +50,124 @@
         </div>
     </div>
 </nav>
+
+<div class="container py-3">
+    <?php if (isset($_SESSION['message'])): ?>
+        <div class="alert alert-<?= $_SESSION['message_type'] ?> alert-dismissible fade show" role="alert">
+            <?= $_SESSION['message'] ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <?php
+        unset($_SESSION['message']);
+        unset($_SESSION['message_type']);
+        ?>
+    <?php endif; ?>
+</div>
+
+<!-- Admin container -->
+<div class="container-fluid admin-container">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-2 d-none d-md-block sidebar">
+            <div class="sidebar-sticky">
+                <div class="admin-profile text-center p-3">
+                    <img src="<?= htmlspecialchars("../" . $admin_user['profile_image']) ?>" class="admin-avatar" alt="Admin">
+                    <h5><?= htmlspecialchars($admin_user['username']) ?></h5>
+                    <p class="text-muted"><?= htmlspecialchars($admin_user['email']) ?></p>
+                </div>
+                <hr>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link <?= $active_tab == 'users' ? 'active' : '' ?>" href="?tab=users">
+                            <i class="fas fa-users"></i>
+                            Utilisateurs
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?= $active_tab == 'properties' ? 'active' : '' ?>" href="?tab=properties">
+                            <i class="fas fa-home"></i>
+                            Propriétés
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?= $active_tab == 'bookings' ? 'active' : '' ?>" href="?tab=bookings">
+                            <i class="fas fa-calendar-check"></i>
+                            Réservations
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?= $active_tab == 'reviews' ? 'active' : '' ?>" href="?tab=reviews">
+                            <i class="fas fa-star"></i>
+                            Avis
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <main role="main" class="col-md-10 ml-sm-auto col-lg-10 px-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">Panneau d'administration</h1>
+            </div>
+
+            <div class="tab-content">
+                <div class="tab-pane fade <?= $active_tab == 'users' ? 'show active' : '' ?>" id="users-tab">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Gestion des utilisateurs</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nom d'utilisateur</th>
+                                        <th>Email</th>
+                                        <th>Nom complet</th>
+                                        <th>Type</th>
+                                        <th>Date d'inscription</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <?php foreach ($users as $user): ?>
+                                        <tr>
+                                            <td><?= $user['id'] ?></td>
+                                            <td><?= htmlspecialchars($user['username']) ?></td>
+                                            <td><?= htmlspecialchars($user['email']) ?></td>
+                                            <td><?= htmlspecialchars($user['first_name'] . ' ' . $user['last_name']) ?></td>
+                                            <td>
+                                                <?php if ($user['user_type'] == 'admin'): ?>
+                                                    <span class="badge bg-danger">Administrateur</span>
+                                                <?php elseif ($user['user_type'] == 'staff'): ?>
+                                                    <span class="badge bg-primary">Staff</span>
+                                                <?php else: ?>
+                                                    <span class="badge bg-success">Étudiant</span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td><?= date('d/m/Y H:i', strtotime($user['created_at'])) ?></td>
+                                            <td>
+                                                <a href="edit_user.php?id=<?= $user['id'] ?>" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-edit"></i> Modifier
+                                                </a>
+                                                <?php if ($user['id'] != $user_id): ?>
+                                                    <button class="btn btn-sm btn-outline-danger"
+                                                            onclick="confirmDelete('user', <?= $user['id'] ?>, '<?= htmlspecialchars($user['username']) ?>')">
+                                                        <i class="fas fa-trash"></i> Supprimer
+                                                    </button>
+                                                <?php endif; ?>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+</div>
