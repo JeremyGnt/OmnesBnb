@@ -11,6 +11,7 @@ if (isset($_SESSION["user_id"])) {
 require_once "../includes/db_connection.php";
 
 include "../includes/header.php";
+echo '<link rel="stylesheet" href="../css/register.css">';
 
 $email = $password = $confirm_password = $first_name = $last_name = "";
 $email_err = $password_err = $confirm_password_err = $first_name_err = $last_name_err = $terms_err = "";
@@ -71,18 +72,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (!isset($_POST['terms'])) {
         $terms_err = "Vous devez accepter les conditions pour vous inscrire.";
-    }
-
-    if (empty($email_err) && empty($password_err) && empty($confirm_password_err) && empty($first_name_err) && empty($last_name_err) && empty($terms_err)) {
+    }    if (empty($email_err) && empty($password_err) && empty($confirm_password_err) && empty($first_name_err) && empty($last_name_err) && empty($terms_err)) {
         $user_type = preg_match("/@(ece\.fr|omnesintervenant\.com)$/", $email) ? 'staff' : 'student';
-        $sql = "INSERT INTO users (email, password, first_name, last_name, user_type, is_verified) VALUES (?, ?, ?, ?, ?, FALSE)";
+        // Définir l'image de profil par défaut
+        $default_profile_image = "assets/profile_images/default-profile.jpg";
+        
+        $sql = "INSERT INTO users (email, password, first_name, last_name, user_type, profile_image, is_verified) VALUES (?, ?, ?, ?, ?, ?, FALSE)";
         if ($stmt = mysqli_prepare($conn, $sql)) {
-            mysqli_stmt_bind_param($stmt, "sssss", $param_email, $param_password, $param_first_name, $param_last_name, $param_user_type);
+            mysqli_stmt_bind_param($stmt, "ssssss", $param_email, $param_password, $param_first_name, $param_last_name, $param_user_type, $param_profile_image);
             $param_email = $email;
             $param_password = password_hash($password, PASSWORD_DEFAULT);
             $param_first_name = $first_name;
             $param_last_name = $last_name;
             $param_user_type = $user_type;
+            $param_profile_image = $default_profile_image;
             if (mysqli_stmt_execute($stmt)) {
                 $_SESSION['message'] = "Inscription réussie. Vous pouvez maintenant vous connecter.";
                 $_SESSION['message_type'] = "success";
@@ -96,7 +99,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 ?>
 
-<link rel="stylesheet" href="../css/register.css">
 
 <div class="container">
     <div class="form-card">

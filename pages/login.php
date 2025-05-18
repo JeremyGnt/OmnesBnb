@@ -1,5 +1,4 @@
 <?php
-// Commencer la session avant tout output HTML
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
@@ -12,6 +11,7 @@ if (isset($_SESSION["user_id"])) {
 require_once "../includes/db_connection.php";
 
 include "../includes/header.php";
+echo '<link rel="stylesheet" href="../css/login.css">';
 
 $email = $password = "";
 $email_err = $password_err = $login_err = "";
@@ -70,8 +70,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     mysqli_close($conn);
 }
 ?>
-
-<link rel="stylesheet" href="../css/login.css">
 
 <div class="login-container">
     <div class="login-box">
