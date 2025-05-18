@@ -166,7 +166,85 @@
                         </div>
                     </div>
                 </div>
-
+                <!-- propriétés de la Tab -->
+                <div class="tab-pane fade <?= $active_tab == 'properties' ? 'show active' : '' ?>" id="properties-tab">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Gestion des propriétés</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Titre</th>
+                                        <th>Type</th>
+                                        <th>Localisation</th>
+                                        <th>Prix/nuit</th>
+                                        <th>Propriétaire</th>
+                                        <th>Statut</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <?php foreach ($properties as $property): ?>
+                                        <tr>
+                                            <td><?= $property['id'] ?></td>
+                                            <td><?= htmlspecialchars($property['title']) ?></td>
+                                            <td>
+                                                <?php
+                                                switch ($property['property_type']) {
+                                                    case 'apartment':
+                                                        echo 'Appartement';
+                                                        break;
+                                                    case 'studio':
+                                                        echo 'Studio';
+                                                        break;
+                                                    case 'house':
+                                                        echo 'Maison';
+                                                        break;
+                                                    case 'room':
+                                                        echo 'Chambre';
+                                                        break;
+                                                    default:
+                                                        echo $property['property_type'];
+                                                }
+                                                ?>
+                                            </td>
+                                            <td><?= htmlspecialchars($property['location']) ?></td>
+                                            <td><?= number_format($property['price'], 2, ',', ' ') ?> €</td>
+                                            <td>
+                                                <?= htmlspecialchars($property['owner_name']) ?><br>
+                                                <small class="text-muted"><?= htmlspecialchars($property['owner_email']) ?></small>
+                                            </td>
+                                            <td>
+                                                <?php if ($property['is_published']): ?>
+                                                    <span class="badge bg-success">Publié</span>
+                                                <?php else: ?>
+                                                    <span class="badge bg-secondary">Non publié</span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td>
+                                                <a href="property-details.php?id=<?= $property['id'] ?>" class="btn btn-sm btn-outline-info">
+                                                    <i class="fas fa-eye"></i> Voir
+                                                </a>
+                                                <a href="edit_property.php?id=<?= $property['id'] ?>" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-edit"></i> Modifier
+                                                </a>
+                                                <button class="btn btn-sm btn-outline-danger"
+                                                        onclick="confirmDelete('property', <?= $property['id'] ?>, '<?= htmlspecialchars($property['title']) ?>')">
+                                                    <i class="fas fa-trash"></i> Supprimer
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
