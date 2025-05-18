@@ -1,8 +1,10 @@
 <?php
+// --- Démarrage de la session utilisateur ---
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
+// --- Vérification de l'authentification ---
 if (!isset($_SESSION["user_id"])) {
     $_SESSION["message"] = "Vous devez vous connecter pour publier un logement.";
     $_SESSION["message_type"] = "warning";
@@ -10,16 +12,20 @@ if (!isset($_SESSION["user_id"])) {
     exit;
 }
 
+// --- Connexion à la base de données ---
 require_once "../includes/db_connection.php";
 
+// --- Inclusion du header (barre de navigation, etc.) ---
 include "../includes/header.php";
 
 $title = $location = $description = $price = $start_date = $end_date = $max_guests = $type = "";
 $title_err = $location_err = $description_err = $price_err = $start_date_err = $end_date_err = $max_guests_err = $type_err = $image_err = "";
 $address_err = $city_err = $postal_code_err = "";
 
+// --- Traitement du formulaire de publication ---
 if($_SERVER["REQUEST_METHOD"] == "POST"){
 
+    // --- Validation du titre ---
     if(empty(trim($_POST["title"]))){
         $title_err = "Veuillez entrer un titre pour votre logement.";
     } elseif(strlen(trim($_POST["title"])) > 100){
@@ -28,12 +34,14 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         $title = trim($_POST["title"]);
     }
 
+    // --- Validation de l'emplacement ---
     if(empty(trim($_POST["location"]))){
         $location_err = "Veuillez entrer l'emplacement du logement.";
     } else{
         $location = trim($_POST["location"]);
     }
 
+    // --- Validation de la description ---
     if(empty(trim($_POST["description"]))){
         $description_err = "Veuillez entrer une description du logement.";
     } elseif(strlen(trim($_POST["description"])) < 30){
@@ -42,6 +50,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         $description = trim($_POST["description"]);
     }
 
+    // --- Validation du prix ---
     if(empty(trim($_POST["price"]))){
         $price_err = "Veuillez entrer un prix par nuit.";
     } elseif(!is_numeric(trim($_POST["price"])) || floatval(trim($_POST["price"])) <= 0){
@@ -50,6 +59,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         $price = trim($_POST["price"]);
     }
 
+    // --- Validation de la date de début de disponibilité ---
     if(empty(trim($_POST["start_date"]))){
         $start_date_err = "Veuillez entrer une date de disponibilité.";
     } else{
@@ -61,6 +71,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         }
     }
 
+    // --- Validation de la date de fin de disponibilité ---
     if(empty(trim($_POST["end_date"]))){
         $end_date_err = "Veuillez entrer une date de fin de disponibilité.";
     } else{
@@ -71,6 +82,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         }
     }
 
+    // --- Validation du nombre maximal de personnes ---
     if(empty(trim($_POST["max_guests"]))){
         $max_guests_err = "Veuillez indiquer le nombre maximal de personnes.";
     } elseif(!ctype_digit(trim($_POST["max_guests"])) || intval(trim($_POST["max_guests"])) <= 0){
@@ -79,22 +91,26 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         $max_guests = trim($_POST["max_guests"]);
     }
 
+    // --- Validation du type de logement ---
     if(empty($_POST["type"])){
         $type_err = "Veuillez sélectionner un type de logement.";
     } else{
         $type = $_POST["type"];
     }
 
+    // --- Validation de l'adresse ---
     if(empty(trim($_POST["address"]))) {
         $address_err = "Veuillez entrer l'adresse complète du logement.";
     } else {
         $address = trim($_POST["address"]);
     }
+    // --- Validation de la ville ---
     if(empty(trim($_POST["city"]))) {
         $city_err = "Veuillez entrer la ville du logement.";
     } else {
         $city = trim($_POST["city"]);
     }
+    // --- Validation du code postal ---
     if(empty(trim($_POST["postal_code"]))) {
         $postal_code_err = "Veuillez entrer le code postal du logement.";
     } elseif(!preg_match('/^\d{5}$/', trim($_POST["postal_code"]))) {
@@ -103,6 +119,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         $postal_code = trim($_POST["postal_code"]);
     }
 
+    // --- Gestion des uploads d'images ---
     $upload_dir = "../assets/property_images/";
     $uploaded_images = [];
     $image_errors = [];
@@ -156,14 +173,17 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         $image_err = implode("<br>", $image_errors);
     }
 
+    // --- Insertion des données dans la base si aucune erreur ---
     if(empty($title_err) && empty($location_err) && empty($description_err) && empty($price_err) &&
         empty($start_date_err) && empty($end_date_err) && empty($max_guests_err) && empty($type_err) && empty($image_err)
         && empty($address_err) && empty($city_err) && empty($postal_code_err)){
+        // --- Gestion spécifique pour Paris ---
         if(preg_match('/Paris (\d+)(ème|e|er)/i', $location, $matches)) {
             $city = "Paris";
             $postal_code = "750" . str_pad($matches[1], 2, '0', STR_PAD_LEFT);
         }
 
+        // --- Mapping des types de propriété ---
         $property_type_map = [
             'rental' => 'Location complète',
             'colocation' => 'Colocation',
@@ -173,6 +193,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         $surface_area = isset($_POST["surface_area"]) ? intval($_POST["surface_area"]) : 25;
         $rooms = isset($_POST["rooms"]) ? intval($_POST["rooms"]) : 1;
 
+        // --- Récupération des équipements ---
         if(isset($_POST["amenities"]) && is_array($_POST["amenities"])) {
             $amenities = $_POST["amenities"];
         } else {
@@ -188,6 +209,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             $main_image = str_replace("../assets/", "assets/", $main_image);
         }
 
+        // --- Requête d'insertion principale ---
         $sql = "INSERT INTO properties (owner_id, title, description, property_type, location, address, city, postal_code, 
                 price, surface_area, rooms, max_guests, amenities, main_image, available_from, available_to) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -216,8 +238,10 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
             $param_available_from = $start_date;
             $param_available_to = $end_date;
 
+            // --- Exécution de la requête d'insertion ---
             if(mysqli_stmt_execute($stmt)){
                 $property_id = mysqli_insert_id($conn);
+                // --- Insertion des images supplémentaires ---
                 if(count($uploaded_images) > 1) {
                     $images_sql = "INSERT INTO property_images (property_id, image_path) VALUES (?, ?)";
                     $images_stmt = mysqli_prepare($conn, $images_sql);
@@ -238,6 +262,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                     mysqli_stmt_close($images_stmt);
                 }
 
+                // --- Enregistrement de l'activité de l'utilisateur ---
                 $activity_sql = "INSERT INTO user_activity (user_id, activity_type, property_id) VALUES (?, ?, ?)";
                 $activity_type = "property_created";
 

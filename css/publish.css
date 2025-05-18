@@ -1,3 +1,8 @@
+/*
+    Ce fichier CSS gère le style de la page de publication d'une annonce.
+    Il définit l'apparence du formulaire, des champs d'upload d'images, des boutons et des messages d'erreur.
+    Les commentaires expliquent chaque section pour bien comprendre le rôle de chaque bloc.
+*/
 
 .form-card {
     background-color: #fff;

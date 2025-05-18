@@ -1,9 +1,14 @@
 <?php
-// Aucun output HTML avant session_start()
+// --- Démarrage de la session utilisateur ---
+// Aucun output HTML avant session_start() pour éviter les erreurs d'en-tête
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 ?>
+<!--
+    Ce fichier contient le header HTML commun à toutes les pages du site.
+    Il inclut la barre de navigation, les liens CSS principaux, et gère l'affichage du menu utilisateur.
+-->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -26,9 +31,11 @@ if (session_status() == PHP_SESSION_NONE) {
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
                     <a class="nav-link" href="/omnesbnb-equipe-2h/index.php">Accueil</a>
-                </li>                    <li class="nav-item">
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" href="/omnesbnb-equipe-2h/pages/search.php">Chercher un logement</a>
-                </li>                    <li class="nav-item">
+                </li>
+                <li class="nav-item">
                     <a class="nav-link" href="/omnesbnb-equipe-2h/pages/publish.php">Publier un logement</a>
                 </li>
             </ul>
@@ -38,7 +45,8 @@ if (session_status() == PHP_SESSION_NONE) {
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                            data-bs-toggle="dropdown" aria-expanded="false">
                             <i class="fas fa-user-circle me-2"></i><?php echo htmlspecialchars($_SESSION['last_name']); ?>
-                        </a>                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                             <li><a class="dropdown-item" href="/omnesbnb-equipe-2h/pages/profile.php"><i class="fas fa-user me-2"></i>Mon profil</a></li>
                             <?php
                             $user_id = $_SESSION['user_id'];

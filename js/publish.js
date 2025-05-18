@@ -1,21 +1,28 @@
-//pour la publication d'une propriété
+// Script pour gérer l'upload et la prévisualisation des images lors de la publication d'une propriété
+// Les commentaires expliquent chaque partie pour bien comprendre le rôle de chaque bloc
+
 document.addEventListener('DOMContentLoaded', function() {
+    // On récupère les éléments du DOM nécessaires
     const imageInput = document.getElementById('property_images');
     const imagePreview = document.getElementById('image_preview');
     const imageUploadContainer = document.querySelector('.image-upload-container');
     
+    // --- Drag & Drop d'images ---
+    // Permet de surligner la zone quand on glisse un fichier dessus
     function handleDragOver(e) {
         e.preventDefault();
         e.stopPropagation();
         imageUploadContainer.classList.add('drag-over');
     }
     
+    // Retire le surlignage quand on quitte la zone
     function handleDragLeave(e) {
         e.preventDefault();
         e.stopPropagation();
         imageUploadContainer.classList.remove('drag-over');
     }
     
+    // Gère le dépôt de fichiers par glisser-déposer
     function handleDrop(e) {
         e.preventDefault();
         e.stopPropagation();
@@ -26,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
             handleFileSelect();
         }
     }
-    
+    // --- Prévisualisation des images sélectionnées ---
     function handleFileSelect() {
         imagePreview.innerHTML = '';
         
@@ -34,12 +41,14 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
+        // Affiche un indicateur de chargement pendant la lecture des images
         const loadingElement = document.createElement('div');
         loadingElement.id = 'loading-indicator';
         loadingElement.className = 'text-center my-3';
         loadingElement.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Chargement...</span></div><p class="mt-2">Préparation des images...</p>';
         imagePreview.appendChild(loadingElement);
         
+        // Pour chaque image sélectionnée, on crée un aperçu
         Array.from(imageInput.files).forEach((file, index) => {
             if (!file.type.match('image.*')) {
                 return;
@@ -106,7 +115,7 @@ document.addEventListener('DOMContentLoaded', function() {
             reader.readAsDataURL(file);
         });
     }
-    
+    // --- Suppression d'une image de la sélection ---
     function removeImage(index) {
         try {
             const dt = new DataTransfer();
@@ -129,7 +138,7 @@ document.addEventListener('DOMContentLoaded', function() {
             alert("L'image a été marquée pour suppression. Elle sera retirée lors de la soumission du formulaire.");
         }
     }
-    
+    // --- Définir une image comme principale ---
     function setMainImage(index) {
         try {
             const dt = new DataTransfer();
@@ -149,7 +158,7 @@ document.addEventListener('DOMContentLoaded', function() {
             alert("La réorganisation des images n'est pas prise en charge par votre navigateur. La première image téléchargée sera utilisée comme principale.");
         }
     }
-    
+    // --- Ajout des écouteurs d'événements ---
     if (imageInput) {
         imageInput.addEventListener('change', handleFileSelect);
     }

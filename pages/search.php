@@ -1,12 +1,17 @@
 <?php
+// --- Démarrage de la session utilisateur ---
+// On vérifie si une session existe déjà, sinon on la démarre pour gérer l'utilisateur connecté
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
+// --- Connexion à la base de données ---
 require_once "../includes/db_connection.php";
 
+// --- Inclusion du header (barre de navigation, etc.) ---
 include_once "../includes/header.php";
 
+// --- Ajout du CSS spécifique à la page de recherche ---
 echo '<link rel="stylesheet" href="../css/search.css">';
 
 $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
@@ -20,6 +25,7 @@ $min_price = isset($_GET['min_price']) ? (float)$_GET['min_price'] : 0;
 $max_price = isset($_GET['max_price']) ? (float)$_GET['max_price'] : 1000;
 $min_rooms = isset($_GET['min_rooms']) ? (int)$_GET['min_rooms'] : 1;
 
+// --- Construction de la requête de recherche de propriétés ---
 $sql = "SELECT p.*, 
         (SELECT COUNT(*) FROM favorites WHERE property_id = p.id AND user_id = ?) AS is_favorite
         FROM properties p WHERE is_published = TRUE";
@@ -27,6 +33,7 @@ $sql = "SELECT p.*,
 $params = [$user_id];
 $types = "i";
 
+// --- Filtrage par emplacement (ville ou localisation) ---
 if (!empty($location)) {
     $sql .= " AND (city LIKE ? OR location LIKE ?)";
     $params[] = "%$location%";
@@ -34,12 +41,14 @@ if (!empty($location)) {
     $types .= "ss";
 }
 
+// --- Filtrage par type de propriété ---
 if (!empty($property_type)) {
     $sql .= " AND property_type = ?";
     $params[] = $property_type;
     $types .= "s";
 }
 
+// --- Filtrage par dates d'arrivée et de départ (disponibilité) ---
 if (!empty($check_in) && !empty($check_out)) {
     $sql .= " AND p.id NOT IN (
                 SELECT property_id FROM bookings 
@@ -57,35 +66,41 @@ if (!empty($check_in) && !empty($check_out)) {
     $types .= "ssssss";
 }
 
+// --- Filtrage par nombre de voyageurs ---
 $sql .= " AND max_guests >= ?";
 $params[] = $guests;
 $types .= "i";
 
+// --- Filtrage par plage de prix ---
 $sql .= " AND price BETWEEN ? AND ?";
 $params[] = $min_price;
 $params[] = $max_price;
 $types .= "dd";
 
+// --- Filtrage par nombre minimum de pièces ---
 $sql .= " AND rooms >= ?";
 $params[] = $min_rooms;
 $types .= "i";
 
+// --- Tri des résultats par prix croissant ---
 $sql .= " ORDER BY price ASC";
 
 $stmt = mysqli_prepare($conn, $sql);
 
+// --- Liaison des paramètres et exécution de la requête ---
 mysqli_stmt_bind_param($stmt, $types, ...$params);
 mysqli_stmt_execute($stmt);
 
 $result = mysqli_stmt_get_result($stmt);
 $count = mysqli_num_rows($result);
 
+// --- Fonction pour obtenir l'image principale d'une propriété ---
 function getPropertyMainImage($conn, $property_id, $main_image) {
     if (!empty($main_image) && file_exists("../" . $main_image)) {
         return $main_image;
     }
 
-    // Try to get first image from property_images table
+    // Essayer d'obtenir la première image à partir de la table property_images
     $img_sql = "SELECT image_path FROM property_images WHERE property_id = ? LIMIT 1";
     $img_stmt = mysqli_prepare($conn, $img_sql);
     mysqli_stmt_bind_param($img_stmt, "i", $property_id);
@@ -98,9 +113,11 @@ function getPropertyMainImage($conn, $property_id, $main_image) {
     return "assets/property_images/default.jpg";
 }
 
+// --- Récupération des villes pour le filtre ---
 $cities_query = "SELECT DISTINCT city FROM properties WHERE is_published = TRUE ORDER BY city";
 $cities_result = mysqli_query($conn, $cities_query);
 
+// --- Récupération du prix maximum pour le filtre ---
 $max_price_query = "SELECT MAX(price) as max_price FROM properties";
 $max_price_result = mysqli_query($conn, $max_price_query);
 $max_price_row = mysqli_fetch_assoc($max_price_result);

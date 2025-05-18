@@ -1,19 +1,25 @@
 <?php
+// --- Démarrage de la session utilisateur ---
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
+// --- Redirection si déjà connecté ---
 if (isset($_SESSION["user_id"])) {
     header("location: ../index.php");
     exit;
 }
 
+// --- Connexion à la base de données ---
 require_once "../includes/db_connection.php";
 
+// --- Initialisation des variables ---
 $email = $password = $confirm_password = $first_name = $last_name = $phone_number = "";
 $email_err = $password_err = $confirm_password_err = $first_name_err = $last_name_err = $phone_number_err = $terms_err = "";
 
+// --- Traitement du formulaire lors de la soumission ---
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // --- Validation de l'email ---
     if (empty(trim($_POST["email"]))) {
         $email_err = "Veuillez entrer un email.";
     } else {
@@ -38,18 +44,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
+    // --- Validation du prénom ---
     if (empty(trim($_POST["first_name"]))) {
         $first_name_err = "Veuillez entrer votre prénom.";
     } else {
         $first_name = trim($_POST["first_name"]);
     }
 
+    // --- Validation du nom ---
     if (empty(trim($_POST["last_name"]))) {
         $last_name_err = "Veuillez entrer votre nom.";
     } else {
         $last_name = trim($_POST["last_name"]);
     }
 
+    // --- Validation du mot de passe ---
     if (empty(trim($_POST["password"]))) {
         $password_err = "Veuillez entrer un mot de passe.";
     } elseif (strlen(trim($_POST["password"])) < 8) {
@@ -58,6 +67,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $password = trim($_POST["password"]);
     }
 
+    // --- Validation de la confirmation du mot de passe ---
     if (empty(trim($_POST["confirm_password"]))) {
         $confirm_password_err = "Veuillez confirmer le mot de passe.";
     } else {
@@ -67,6 +77,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
+    // --- Validation du numéro de téléphone ---
     if (empty(trim($_POST["phone_number"]))) {
         $phone_number_err = "Veuillez entrer votre numéro de téléphone.";
     } elseif (!preg_match("/^[0-9+\s()-]{8,20}$/", trim($_POST["phone_number"]))) {
@@ -75,9 +86,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $phone_number = trim($_POST["phone_number"]);
     }
 
+    // --- Validation des conditions d'utilisation ---
     if (!isset($_POST['terms'])) {
         $terms_err = "Vous devez accepter les conditions pour vous inscrire.";
     }
+
+    // --- Insertion dans la base de données si pas d'erreurs ---
     if (empty($email_err) && empty($password_err) && empty($confirm_password_err) && empty($first_name_err) && empty($last_name_err) && empty($phone_number_err) && empty($terms_err)) {
         $user_type = preg_match("/@(ece\\.fr|omnesintervenant\\.com)$/", $email) ? 'staff' : 'student';
         $default_profile_image = "assets/profile_images/default-profile.jpg";
@@ -101,9 +115,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
+    // --- Fermeture de la connexion à la base de données ---
     mysqli_close($conn);
 }
 
+// --- Inclusion de l'en-tête ---
 include "../includes/header.php";
 echo '<link rel="stylesheet" href="../css/register.css">';
 ?>

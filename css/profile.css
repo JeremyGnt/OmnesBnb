@@ -1,3 +1,9 @@
+/*
+    Ce fichier CSS gère le style de la page de profil utilisateur.
+    Il définit l'apparence de l'avatar, des formulaires, des boutons et des messages.
+    Les commentaires expliquent chaque section pour bien comprendre le rôle de chaque bloc.
+*/
+
 .profile-image-container {
     width: 120px;
     height: 120px;

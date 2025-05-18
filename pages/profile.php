@@ -1,8 +1,10 @@
 <?php
+// --- Démarrage de la session utilisateur ---
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
+// --- Vérification de l'authentification ---
 if (!isset($_SESSION["user_id"])) {
     $_SESSION["message"] = "Vous devez vous connecter pour accéder à cette page.";
     $_SESSION["message_type"] = "warning";
@@ -10,10 +12,13 @@ if (!isset($_SESSION["user_id"])) {
     exit;
 }
 
+// --- Connexion à la base de données ---
 require_once "../includes/db_connection.php";
 
+// --- Inclusion du header (barre de navigation, etc.) ---
 include "../includes/header.php";
 
+// --- Ajout du CSS spécifique à la page de profil ---
 echo '<link rel="stylesheet" href="../css/profile.css">';
 
 $user_id = $_SESSION["user_id"];

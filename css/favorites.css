@@ -1,3 +1,9 @@
+/*
+    Ce fichier CSS gère le style de la page des favoris.
+    Il définit l'apparence des cartes de propriétés favorites, des boutons, et des messages d'information.
+    Les commentaires expliquent chaque section pour bien comprendre le rôle de chaque bloc.
+*/
+
 .favorites-container {
     margin-top: 1.5rem;
 }

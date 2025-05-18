@@ -1,3 +1,9 @@
+/*
+    Ce fichier CSS gère le style de la page de gestion des locations de l'utilisateur (propriétaire).
+    Il définit l'apparence des tableaux, des cartes de propriétés, et des boutons d'action.
+    Les commentaires expliquent chaque section pour bien comprendre le rôle de chaque bloc.
+*/
+
 .stat-card {
     border: none;
     border-radius: 16px;

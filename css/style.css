@@ -1,3 +1,9 @@
+/*
+    Ce fichier CSS contient les styles globaux du site OmnesBnB.
+    Il définit l'apparence générale, la mise en page, les couleurs, les polices et les éléments communs à toutes les pages.
+    Les commentaires expliquent chaque section pour bien comprendre le rôle de chaque bloc.
+*/
+
 :root {
     --primary-color: #FF5A5F;
     --secondary-color: #484848;

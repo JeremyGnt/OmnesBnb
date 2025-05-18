@@ -1,8 +1,11 @@
 <?php
+// --- Démarrage de la session utilisateur ---
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
+// --- Vérification de l'authentification ---
+// On vérifie que l'utilisateur est connecté, sinon on le redirige vers la page de connexion
 if (!isset($_SESSION["user_id"])) {
     $_SESSION["message"] = "Vous devez vous connecter pour accéder à vos réservations.";
     $_SESSION["message_type"] = "warning";
@@ -10,16 +13,20 @@ if (!isset($_SESSION["user_id"])) {
     exit;
 }
 
+// --- Connexion à la base de données ---
 require_once "../includes/db_connection.php";
 
+// --- Inclusion du header (barre de navigation, etc.) ---
 include "../includes/header.php";
 
+// --- Ajout du CSS et JS spécifiques à la page de réservation ---
 echo '<link rel="stylesheet" href="../css/reservation.css?v='.time().'">';
 echo '<script src="../js/reservation.js?v='.time().'" defer></script>';
 
 $user_id = $_SESSION["user_id"];
 $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'upcoming';
 
+// --- Annulation d'une réservation ---
 if(isset($_GET['cancel']) && !empty($_GET['cancel'])) {
     $reservation_id = $_GET['cancel'];
 
@@ -55,6 +62,7 @@ if(isset($_GET['cancel']) && !empty($_GET['cancel'])) {
     exit;
 }
 
+// --- Récupération des réservations à venir ---
 $upcoming_reservations = [];
 $upcoming_sql = "SELECT b.*, p.title, p.main_image, p.location, p.price, u.last_name as owner_name, u.id as owner_id 
                  FROM bookings b 
@@ -76,6 +84,7 @@ if($stmt = mysqli_prepare($conn, $upcoming_sql)) {
     mysqli_stmt_close($stmt);
 }
 
+// --- Récupération des réservations passées ---
 // Récupérer les réservations passées de l'utilisateur
 $past_reservations = [];
 $past_sql = "SELECT b.*, p.title, p.main_image, p.location, p.price, u.last_name as owner_name, u.id as owner_id
@@ -98,6 +107,7 @@ if($stmt = mysqli_prepare($conn, $past_sql)) {
     mysqli_stmt_close($stmt);
 }
 
+// --- Récupération des réservations annulées ---
 // Récupérer les réservations annulées
 $cancelled_reservations = [];
 $cancelled_sql = "SELECT b.*, p.title, p.main_image, p.location, p.price, u.last_name as owner_name, u.id as owner_id 

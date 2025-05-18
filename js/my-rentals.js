@@ -1,8 +1,14 @@
+// Script pour gérer les interactions sur la page de gestion de mes locations (propriétaire)
+// Les commentaires expliquent chaque partie pour bien comprendre le rôle de chaque bloc
+
 document.addEventListener('DOMContentLoaded', function() {
+    // Sélectionne tous les éléments ayant la classe 'dashboard-card' et 'dashboard-detail-card'
     const dashboardCards = document.querySelectorAll('.dashboard-card');
     const dashboardDetails = document.getElementById('dashboard-details');
     const detailCards = document.querySelectorAll('.dashboard-detail-card');
     const reservationsDetails = document.getElementById('reservations-details');
+
+    // Affiche la section des détails du tableau de bord et cache les autres sections de détails
     if (dashboardDetails && reservationsDetails) {
         dashboardDetails.style.display = 'block';
     }
@@ -13,6 +19,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // Ajoute des écouteurs d'événements à chaque carte du tableau de bord
     if (dashboardCards && dashboardDetails) {
         dashboardCards.forEach(card => {
             card.addEventListener('click', function() {
@@ -21,12 +29,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 dashboardDetails.style.display = 'block';
 
+                // Cache tous les détails sauf ceux de la carte cliquée
                 detailCards.forEach(card => {
                     if (card.id !== 'reservations-details') {
                         card.style.display = 'none';
                     }
                 });
 
+                // Affiche la carte de détail correspondante
                 if (detailCard) {
                     detailCard.style.display = 'block';
                     detailCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -35,6 +45,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Gestion des boutons d'édition des propriétés
     const editButtons = document.querySelectorAll('.edit-property');
     if (editButtons.length > 0) {
         editButtons.forEach(button => {
@@ -45,6 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Initialisation des modales Bootstrap pour l'édition, la notification et la suppression
     const togglePropertyModalElement = document.getElementById('togglePropertyModal');
     const notificationModalElement = document.getElementById('notificationModal');
     const deletePropertyModalElement = document.getElementById('deletePropertyModal');
@@ -66,6 +78,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('Bootstrap n\'est pas chargé correctement');
     }
 
+    // Gestion des boutons d'activation/désactivation des propriétés
     const toggleButtons = document.querySelectorAll('.toggle-property');
     let currentButton = null;
     let currentPropertyId = null;
@@ -225,6 +238,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
+    // Gestion des boutons de suppression de propriété
     const deleteButtons = document.querySelectorAll('.delete-property');
     let propertyToDelete = null;
     let propertyTitleToDelete = '';
@@ -369,6 +383,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
+    // Fonction pour gérer les actions de réservation (confirmation/annulation)
     function handleBookingAction(bookingId, action, buttonElement) {
         fetch('../includes/booking_handler.php', {
             method: 'POST',

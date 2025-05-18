@@ -1,3 +1,9 @@
+/*
+    Ce fichier CSS gère le style de la page de recherche de logements.
+    Il définit l'apparence des filtres, des résultats, des cartes de propriétés et des boutons.
+    Les commentaires expliquent chaque section pour bien comprendre le rôle de chaque bloc.
+*/
+
 :root {
     --primary-color: #ff5a5f;
     --secondary-color: #343a40;

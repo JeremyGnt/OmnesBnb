@@ -1,3 +1,6 @@
+// Script pour gérer l'ajout et la suppression des favoris côté client
+// Les commentaires expliquent chaque partie pour bien comprendre le rôle de chaque bloc
+
 document.addEventListener('DOMContentLoaded', function() {
     // Gérer la suppression des favoris via le bouton "favorite-button"
     document.querySelectorAll('.favorite-button').forEach(btn => {

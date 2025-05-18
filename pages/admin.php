@@ -1,10 +1,13 @@
 <?php
+// --- Démarrage de la session utilisateur ---
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
+// --- Connexion à la base de données ---
 require_once "../includes/db_connection.php";
 
+// --- Vérification de l'authentification et des droits admin ---
 if (!isset($_SESSION['user_id'])) {
     $_SESSION['message'] = "Vous devez être connecté pour accéder à cette page.";
     $_SESSION['message_type'] = "danger";

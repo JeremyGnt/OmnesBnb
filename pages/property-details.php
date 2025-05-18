@@ -1,19 +1,20 @@
 <?php
+// --- Démarrage de la session utilisateur ---
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
-
+// --- Connexion à la base de données ---
 require_once "../includes/db_connection.php";
-
+// --- Vérification de la présence de l'identifiant du logement ---
 if (!isset($_GET['id']) || empty($_GET['id'])) {
     $_SESSION['message'] = "Aucun logement spécifié.";
     $_SESSION['message_type'] = "warning";
     header("Location: search.php");
     exit;
 }
-
+// --- Inclusion du header (barre de navigation, etc.) ---
 include_once "../includes/header.php";
-
+// --- Ajout du CSS spécifique à la page de détails ---
 echo '<link rel="stylesheet" href="../css/property-details.css">';
 
 $property_id = (int)$_GET['id'];
@@ -32,6 +33,7 @@ mysqli_stmt_bind_param($stmt, "ii", $user_id, $property_id);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 
+// --- Vérification de l'existence du logement dans la base de données ---
 if (mysqli_num_rows($result) === 0) {
     $_SESSION['message'] = "Ce logement n'existe pas ou n'est pas disponible.";
     $_SESSION['message_type'] = "warning";

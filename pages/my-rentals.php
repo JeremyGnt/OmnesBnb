@@ -1,8 +1,10 @@
 <?php
+// --- Démarrage de la session utilisateur ---
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
+// --- Vérification de l'authentification ---
 if (!isset($_SESSION["user_id"])) {
     $_SESSION["message"] = "Vous devez vous connecter pour accéder à vos locations.";
     $_SESSION["message_type"] = "warning";
@@ -10,25 +12,33 @@ if (!isset($_SESSION["user_id"])) {
     exit;
 }
 
+// --- Connexion à la base de données ---
 require_once "../includes/db_connection.php";
 
+// --- Inclusion du header (barre de navigation, etc.) ---
 include "../includes/header.php";
 
+// --- Ajout du CSS spécifique à la page de locations et dashboard ---
 echo '<link rel="stylesheet" href="../css/my-rentals.css">';
 echo '<link rel="stylesheet" href="../css/dashboard.css">';
 
+// Initialisation des variables
 $my_properties = [];
 $user_id = $_SESSION["user_id"];
+
+// --- Requête pour récupérer les propriétés de l'utilisateur ---
 $properties_sql = "SELECT p.*, 
                     (SELECT COUNT(*) FROM bookings WHERE property_id = p.id) as booking_count,
                     (SELECT SUM(total_price) FROM bookings WHERE property_id = p.id AND status = 'confirmed') as total_earned
                     FROM properties p 
                     WHERE p.owner_id = ?";
 
+// Préparation et exécution de la requête
 if ($stmt = mysqli_prepare($conn, $properties_sql)) {
     mysqli_stmt_bind_param($stmt, "i", $user_id);
     if (mysqli_stmt_execute($stmt)) {
         $result = mysqli_stmt_get_result($stmt);
+        // Parcours des propriétés récupérées
         while ($property = mysqli_fetch_assoc($result)) {
             // Récupérer les réservations pour cette propriété
             $property['bookings'] = [];
@@ -37,12 +47,14 @@ if ($stmt = mysqli_prepare($conn, $properties_sql)) {
                             JOIN users u ON b.user_id = u.id
                             WHERE b.property_id = ? AND b.status != 'cancelled'";
 
+            // Préparation et exécution de la requête pour les réservations
             if ($bookings_stmt = mysqli_prepare($conn, $bookings_sql)) {
                 mysqli_stmt_bind_param($bookings_stmt, "i", $property['id']);
 
                 if (mysqli_stmt_execute($bookings_stmt)) {
                     $bookings_result = mysqli_stmt_get_result($bookings_stmt);
 
+                    // Parcours des réservations et ajout des informations sur le locataire
                     while ($booking = mysqli_fetch_assoc($bookings_result)) {
                         $booking['tenant_name'] = $booking['first_name'] . ' ' . $booking['last_name'];
                         $booking['tenant_id'] = $booking['user_id'];
@@ -57,9 +69,11 @@ if ($stmt = mysqli_prepare($conn, $properties_sql)) {
     mysqli_stmt_close($stmt);
 }
 
+// Initialisation des tableaux pour les propriétés louées et l'historique
 $rented_properties = [];
+$past_rentals = [];
 
-// Requête pour récupérer les propriétés louées par l'utilisateur
+// --- Requête pour récupérer les propriétés louées par l'utilisateur ---
 $rented_sql = "SELECT b.*, p.title, p.location, p.price, p.main_image,
                 u.first_name as owner_first_name, u.last_name as owner_last_name, u.id as owner_id
                 FROM bookings b
@@ -68,11 +82,13 @@ $rented_sql = "SELECT b.*, p.title, p.location, p.price, p.main_image,
                 WHERE b.user_id = ? AND b.status = 'confirmed' AND b.end_date >= CURDATE()
                 ORDER BY b.start_date ASC";
 
+// Préparation et exécution de la requête pour les propriétés louées
 if ($rented_stmt = mysqli_prepare($conn, $rented_sql)) {
     mysqli_stmt_bind_param($rented_stmt, "i", $user_id);
 
     if (mysqli_stmt_execute($rented_stmt)) {
         $rented_result = mysqli_stmt_get_result($rented_stmt);
+        // Parcours des réservations louées
         while ($booking = mysqli_fetch_assoc($rented_result)) {
             $rented_property = [
                 'id' => $booking['property_id'],
@@ -91,10 +107,10 @@ if ($rented_stmt = mysqli_prepare($conn, $rented_sql)) {
         }
     }
     mysqli_stmt_close($rented_stmt);
-    $past_rentals = [];
+}
 
-// Requête pour récupérer les locations passées où l'utilisateur était locataire
-    $past_tenant_sql = "SELECT b.*, p.title, p.location, p.price, p.main_image,
+// --- Requête pour récupérer les locations passées où l'utilisateur était locataire ---
+$past_tenant_sql = "SELECT b.*, p.title, p.location, p.price, p.main_image,
                     u.first_name as owner_first_name, u.last_name as owner_last_name, u.id as owner_id
                     FROM bookings b
                     JOIN properties p ON b.property_id = p.id
@@ -103,34 +119,36 @@ if ($rented_stmt = mysqli_prepare($conn, $rented_sql)) {
                     ORDER BY b.end_date DESC
                     LIMIT 10";
 
-    if ($past_tenant_stmt = mysqli_prepare($conn, $past_tenant_sql)) {
-        mysqli_stmt_bind_param($past_tenant_stmt, "i", $user_id);
+// Préparation et exécution de la requête pour l'historique en tant que locataire
+if ($past_tenant_stmt = mysqli_prepare($conn, $past_tenant_sql)) {
+    mysqli_stmt_bind_param($past_tenant_stmt, "i", $user_id);
 
-        if (mysqli_stmt_execute($past_tenant_stmt)) {
-            $past_tenant_result = mysqli_stmt_get_result($past_tenant_stmt);
-            while ($booking = mysqli_fetch_assoc($past_tenant_result)) {
-                $past_rental = [
-                    'id' => $booking['property_id'],
-                    'title' => $booking['title'],
-                    'location' => $booking['location'],
-                    'owner_name' => $booking['owner_first_name'] . ' ' . $booking['owner_last_name'],
-                    'owner_id' => $booking['owner_id'],
-                    'price' => $booking['price'],
-                    'image' => $booking['main_image'],
-                    'start_date' => $booking['start_date'],
-                    'end_date' => $booking['end_date'],
-                    'total_price' => $booking['total_price'],
-                    'status' => 'completed',
-                    'as_owner' => false
-                ];
-                $past_rentals[] = $past_rental;
-            }
+    if (mysqli_stmt_execute($past_tenant_stmt)) {
+        $past_tenant_result = mysqli_stmt_get_result($past_tenant_stmt);
+        // Parcours des réservations passées en tant que locataire
+        while ($booking = mysqli_fetch_assoc($past_tenant_result)) {
+            $past_rental = [
+                'id' => $booking['property_id'],
+                'title' => $booking['title'],
+                'location' => $booking['location'],
+                'owner_name' => $booking['owner_first_name'] . ' ' . $booking['owner_last_name'],
+                'owner_id' => $booking['owner_id'],
+                'price' => $booking['price'],
+                'image' => $booking['main_image'],
+                'start_date' => $booking['start_date'],
+                'end_date' => $booking['end_date'],
+                'total_price' => $booking['total_price'],
+                'status' => 'completed',
+                'as_owner' => false
+            ];
+            $past_rentals[] = $past_rental;
         }
-        mysqli_stmt_close($past_tenant_stmt);
     }
+    mysqli_stmt_close($past_tenant_stmt);
+}
 
-// Requête pour récupérer les locations passées où l'utilisateur était propriétaire
-    $past_owner_sql = "SELECT b.*, p.title, p.location, p.price, p.main_image,
+// --- Requête pour récupérer les locations passées où l'utilisateur était propriétaire ---
+$past_owner_sql = "SELECT b.*, p.title, p.location, p.price, p.main_image,
                   u.first_name as tenant_first_name, u.last_name as tenant_last_name, u.id as tenant_id
                   FROM bookings b
                   JOIN properties p ON b.property_id = p.id
@@ -139,38 +157,41 @@ if ($rented_stmt = mysqli_prepare($conn, $rented_sql)) {
                   ORDER BY b.end_date DESC
                   LIMIT 10";
 
-    if ($past_owner_stmt = mysqli_prepare($conn, $past_owner_sql)) {
-        mysqli_stmt_bind_param($past_owner_stmt, "i", $user_id);
+// Préparation et exécution de la requête pour l'historique en tant que propriétaire
+if ($past_owner_stmt = mysqli_prepare($conn, $past_owner_sql)) {
+    mysqli_stmt_bind_param($past_owner_stmt, "i", $user_id);
 
-        if (mysqli_stmt_execute($past_owner_stmt)) {
-            $past_owner_result = mysqli_stmt_get_result($past_owner_stmt);
-            while ($booking = mysqli_fetch_assoc($past_owner_result)) {
-                $past_rental = [
-                    'id' => $booking['property_id'],
-                    'title' => $booking['title'],
-                    'location' => $booking['location'],
-                    'tenant_name' => $booking['tenant_first_name'] . ' ' . $booking['tenant_last_name'],
-                    'tenant_id' => $booking['tenant_id'],
-                    'price' => $booking['price'],
-                    'image' => $booking['main_image'],
-                    'start_date' => $booking['start_date'],
-                    'end_date' => $booking['end_date'],
-                    'total_price' => $booking['total_price'],
-                    'status' => 'completed',
-                    'as_owner' => true
-                ];
-                $past_rentals[] = $past_rental;
-            }
+    if (mysqli_stmt_execute($past_owner_stmt)) {
+        $past_owner_result = mysqli_stmt_get_result($past_owner_stmt);
+        // Parcours des réservations passées en tant que propriétaire
+        while ($booking = mysqli_fetch_assoc($past_owner_result)) {
+            $past_rental = [
+                'id' => $booking['property_id'],
+                'title' => $booking['title'],
+                'location' => $booking['location'],
+                'tenant_name' => $booking['tenant_first_name'] . ' ' . $booking['tenant_last_name'],
+                'tenant_id' => $booking['tenant_id'],
+                'price' => $booking['price'],
+                'image' => $booking['main_image'],
+                'start_date' => $booking['start_date'],
+                'end_date' => $booking['end_date'],
+                'total_price' => $booking['total_price'],
+                'status' => 'completed',
+                'as_owner' => true
+            ];
+            $past_rentals[] = $past_rental;
         }
-        mysqli_stmt_close($past_owner_stmt);
     }
+    mysqli_stmt_close($past_owner_stmt);
 }
 
+// Calcul des totaux pour le tableau de bord
 $total_earned = 0;
 $total_spent = 0;
 $total_bookings = 0;
 $active_listings = 0;
 
+// Parcours des propriétés pour calculer les revenus et le nombre de réservations
 foreach ($my_properties as $property) {
     $active_listings++;
     if(isset($property['bookings'])) {
@@ -185,11 +206,15 @@ foreach ($my_properties as $property) {
         }
     }
 }
+
+// Parcours des propriétés louées pour calculer les dépenses
 foreach ($rented_properties as $property) {
     if ($property['status'] === 'confirmed' || $property['status'] === 'completed') {
         $total_spent += $property['total_price'];
     }
 }
+
+// Parcours de l'historique des locations pour ajuster les totaux en fonction du rôle (locataire/propriétaire)
 foreach ($past_rentals as $rental) {
     if ($rental['status'] === 'completed') {
         if (isset($rental['as_owner']) && $rental['as_owner']) {
@@ -200,12 +225,15 @@ foreach ($past_rentals as $rental) {
     }
 }
 
+// Calcul du solde net
 $net_balance = $total_earned - $total_spent;
 ?>
 
 <div class="container py-4">
+    <!-- Tableau de bord - Résumé des revenus, dépenses, propriétés et réservations -->
     <div class="row mb-4">
         <h3 class="mb-4">Tableau de bord</h3>
+        <!-- Carte des revenus -->
         <div class="col-md-3 mb-3">
             <div class="card border-0 shadow-sm h-100 dashboard-card" data-card="revenus">
                 <div class="card-body d-flex flex-column align-items-center">
@@ -218,6 +246,7 @@ $net_balance = $total_earned - $total_spent;
                 </div>
             </div>
         </div>
+        <!-- Carte des dépenses -->
         <div class="col-md-3 mb-3">
             <div class="card border-0 shadow-sm h-100 dashboard-card" data-card="depenses">
                 <div class="card-body d-flex flex-column align-items-center">
@@ -230,6 +259,7 @@ $net_balance = $total_earned - $total_spent;
                 </div>
             </div>
         </div>
+        <!-- Carte des propriétés actives -->
         <div class="col-md-3 mb-3">
             <div class="card border-0 shadow-sm h-100 dashboard-card" data-card="proprietes">
                 <div class="card-body d-flex flex-column align-items-center">
@@ -242,6 +272,7 @@ $net_balance = $total_earned - $total_spent;
                 </div>
             </div>
         </div>
+        <!-- Carte des réservations -->
         <div class="col-md-3 mb-3">
             <div class="card border-0 shadow-sm h-100 dashboard-card" data-card="reservations">
                 <div class="card-body d-flex flex-column align-items-center">
@@ -298,6 +329,7 @@ $net_balance = $total_earned - $total_spent;
                                     <tbody>
                                     <?php
                                     $recentBookings = [];
+                                    // Récupération des réservations récentes pour affichage dans le tableau de bord
                                     foreach ($my_properties as $property) {
                                         foreach ($property['bookings'] as $booking) {
                                             $booking['property_title'] = $property['title'];
@@ -305,11 +337,13 @@ $net_balance = $total_earned - $total_spent;
                                             $recentBookings[] = $booking;
                                         }
                                     }
+                                    // Tri des réservations récentes par date de début
                                     usort($recentBookings, function($a, $b) {
                                         return strtotime($b['start_date']) - strtotime($a['start_date']);
                                     });
 
                                     $count = 0;
+                                    // Affichage des 5 réservations les plus récentes
                                     foreach ($recentBookings as $booking):
                                         if ($count >= 5) break;
                                         ?>
@@ -425,10 +459,11 @@ $net_balance = $total_earned - $total_spent;
                                 <div class="property-image-wrapper">
                                     <?php
                                     $image_path = "";
+                                    // Vérification de l'existence de l'image principale de la propriété
                                     if (!empty($property['main_image']) && file_exists("../" . $property['main_image'])) {
                                         $image_path = "../" . $property['main_image'];
                                     } else {
-                                        // Utilisez une image par défaut
+                                        // Utilisez une image par défaut si aucune image n'est disponible
                                         $image_path = "../assets/property_images/default.jpg";
                                     }
                                     ?>
@@ -436,6 +471,7 @@ $net_balance = $total_earned - $total_spent;
 
                                     <div class="property-type-badge">
                                         <?php
+                                        // Affichage du type de propriété (appartement, maison, etc.)
                                         echo htmlspecialchars($property['property_type']);
                                         ?>
                                     </div>

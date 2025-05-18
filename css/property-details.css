@@ -1,3 +1,9 @@
+/*
+    Ce fichier CSS gère le style de la page de détails d'une propriété.
+    Il définit l'apparence de la galerie d'images, des informations du logement, des boutons et des avis.
+    Les commentaires expliquent chaque section pour bien comprendre le rôle de chaque bloc.
+*/
+
 .property-details-page {
     padding-bottom: 2rem;
 }

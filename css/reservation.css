@@ -1,3 +1,8 @@
+/*
+    Ce fichier CSS gère le style de la page de gestion des réservations.
+    Il définit l'apparence des tableaux, des boutons, des onglets et des messages d'information.
+    Les commentaires expliquent chaque section pour bien comprendre le rôle de chaque bloc.
+*/
 
 :root {
     --primary-color: #ff5a5f;

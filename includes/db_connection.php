@@ -1,5 +1,12 @@
 <?php
 /*
+    Ce fichier gère la connexion à la base de données MySQL du projet.
+    On définit les constantes de connexion (serveur, utilisateur, mot de passe, nom de la base).
+    On utilise mysqli_connect pour établir la connexion.
+    Si la connexion échoue, on arrête le script avec un message d'erreur.
+*/
+
+/*
 define('DB_SERVER', 'localhost');
 define('DB_USERNAME', 'root');
 define('DB_PASSWORD', '');

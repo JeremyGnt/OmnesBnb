@@ -1,3 +1,7 @@
+<!--
+    Ce fichier contient le footer HTML commun à toutes les pages du site.
+    Il inclut les liens rapides, les informations de contact, et les scripts JS principaux.
+-->
 </div>
 
 <footer class="bg-dark text-white py-4 mt-5">
@@ -29,7 +33,7 @@
         </div>
     </div>
 </footer>
-
+<!-- Scripts JS principaux du site -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="/omnesbnb-equipe-2h/js/main.js"></script>

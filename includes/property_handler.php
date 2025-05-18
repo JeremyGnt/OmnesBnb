@@ -1,9 +1,9 @@
 <?php
-
+// --- Démarrage de la session utilisateur ---
 session_start();
-
+// --- Connexion à la base de données ---
 require_once "db_connection.php";
-
+// --- Vérification de l'authentification ---
 if (!isset($_SESSION['user_id'])) {
     echo json_encode([
         'success' => false,

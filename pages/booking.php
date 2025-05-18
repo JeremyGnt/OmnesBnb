@@ -1,22 +1,28 @@
 <?php
+// --- Démarrage de la session utilisateur ---
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
+// --- Vérification de l'authentification ---
 if (!isset($_SESSION["user_id"])) {
     $_SESSION["message"] = "Vous devez vous connecter pour effectuer une réservation.";
     $_SESSION["message_type"] = "warning";
+    // On garde la page à laquelle l'utilisateur voulait accéder pour le rediriger après connexion
     $_SESSION["redirect_after_login"] = "property-details.php?id=" . (isset($_GET['property_id']) ? $_GET['property_id'] : '');
     header("Location: login.php");
     exit;
 }
 
+// --- Connexion à la base de données ---
 require_once "../includes/db_connection.php";
 
+// --- Inclusion du header (barre de navigation, etc.) ---
 include "../includes/header.php";
 
 $user_id = $_SESSION["user_id"];
 
+// --- Vérification des paramètres de réservation ---
 if (!isset($_GET['property_id']) || !isset($_GET['check_in']) || !isset($_GET['check_out']) || !isset($_GET['guests'])) {
     $_SESSION["message"] = "Informations de réservation manquantes.";
     $_SESSION["message_type"] = "warning";
@@ -29,6 +35,7 @@ $check_in = $_GET['check_in'];
 $check_out = $_GET['check_out'];
 $guests = (int)$_GET['guests'];
 
+// --- Vérification de la date d'arrivée ---
 $today = date('Y-m-d');
 if ($check_in < $today) {
     $_SESSION["message"] = "La date d'arrivée ne peut pas être dans le passé.";
@@ -37,6 +44,7 @@ if ($check_in < $today) {
     exit;
 }
 
+// --- Vérification de la date de départ ---
 if ($check_out <= $check_in) {
     $_SESSION["message"] = "La date de départ doit être postérieure à la date d'arrivée.";
     $_SESSION["message_type"] = "warning";
@@ -44,6 +52,7 @@ if ($check_out <= $check_in) {
     exit;
 }
 
+// --- Récupération des détails de la propriété ---
 $property_sql = "SELECT p.*, u.first_name, u.last_name 
                 FROM properties p 
                 JOIN users u ON p.owner_id = u.id 
@@ -54,6 +63,7 @@ mysqli_stmt_bind_param($stmt, "i", $property_id);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 
+// --- Vérification de l'existence de la propriété ---
 if (mysqli_num_rows($result) === 0) {
     $_SESSION["message"] = "Ce logement n'existe pas ou n'est pas disponible.";
     $_SESSION["message_type"] = "warning";
@@ -63,7 +73,7 @@ if (mysqli_num_rows($result) === 0) {
 
 $property = mysqli_fetch_assoc($result);
 
-// Verif que le proprio n'est pas le locataire
+// --- Vérification que le propriétaire n'essaie pas de réserver son propre logement ---
 if ($property['owner_id'] == $user_id) {
     $_SESSION["message"] = "Vous ne pouvez pas réserver votre propre logement.";
     $_SESSION["message_type"] = "warning";
@@ -71,7 +81,7 @@ if ($property['owner_id'] == $user_id) {
     exit;
 }
 
-//verif si date proprio ok
+//--- Vérification de la disponibilité du logement aux dates souhaitées ---
 if ($check_in < $property['available_from'] || $check_out > $property['available_to']) {
     $_SESSION["message"] = "Le logement n'est pas disponible pour les dates sélectionnées.";
     $_SESSION["message_type"] = "warning";
@@ -79,7 +89,7 @@ if ($check_in < $property['available_from'] || $check_out > $property['available
     exit;
 }
 
-// verif le nombre de personne
+// --- Vérification du nombre de personnes ---
 if ($guests <= 0 || $guests > $property['max_guests']) {
     $_SESSION["message"] = "Le nombre de voyageurs est invalide.";
     $_SESSION["message_type"] = "warning";
@@ -87,7 +97,7 @@ if ($guests <= 0 || $guests > $property['max_guests']) {
     exit;
 }
 
-// verif si deja réservé
+// --- Vérification de la disponibilité du logement (pas déjà réservé) ---
 $check_availability_sql = "SELECT id 
                           FROM bookings 
                           WHERE property_id = ? 
@@ -99,6 +109,7 @@ mysqli_stmt_bind_param($availability_stmt, "issssss", $property_id, $check_out, 
 mysqli_stmt_execute($availability_stmt);
 $availability_result = mysqli_stmt_get_result($availability_stmt);
 
+// --- Vérification si le logement est déjà réservé pour les dates choisies ---
 if (mysqli_num_rows($availability_result) > 0) {
     $_SESSION["message"] = "Le logement est déjà réservé pour ces dates.";
     $_SESSION["message_type"] = "warning";
@@ -106,14 +117,14 @@ if (mysqli_num_rows($availability_result) > 0) {
     exit;
 }
 
-// nb de nuit et prix
+// --- Calcul du nombre de nuits et du prix total ---
 $check_in_date = new DateTime($check_in);
 $check_out_date = new DateTime($check_out);
 $interval = $check_in_date->diff($check_out_date);
 $nights = $interval->days;
 $total_price = $property['price'] * $nights;
 
-// confirme la resa
+// --- Confirmation de la réservation ---
 if (isset($_POST['confirm_booking'])) {    // insert dans la base
     $booking_sql = "INSERT INTO bookings (property_id, user_id, start_date, end_date, guests, total_price, status, created_at, updated_at) 
                    VALUES (?, ?, ?, ?, ?, ?, 'pending', NOW(), NOW())";
@@ -138,7 +149,7 @@ if (isset($_POST['confirm_booking'])) {    // insert dans la base
     }
 }
 
-
+// --- Récupération de l'image de la propriété ---
 $images_sql = "SELECT image_path FROM property_images WHERE property_id = ? LIMIT 1";
 $images_stmt = mysqli_prepare($conn, $images_sql);
 mysqli_stmt_bind_param($images_stmt, "i", $property_id);
@@ -155,7 +166,7 @@ if (mysqli_num_rows($images_result) > 0) {
     $image_path = "assets/property_images/default.jpg";
 }
 
-
+// --- Récupération des informations de l'utilisateur ---
 $user_sql = "SELECT * FROM users WHERE id = ?";
 $user_stmt = mysqli_prepare($conn, $user_sql);
 mysqli_stmt_bind_param($user_stmt, "i", $user_id);
