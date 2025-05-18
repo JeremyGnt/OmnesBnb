@@ -184,7 +184,66 @@ if ($type && $id) {
         echo '</form></div>';
     }
 }
+
+$tab = isset($_GET['tab']) ? $_GET['tab'] : 'users';
+echo '<div class="container mt-4">';
+echo '<ul class="nav nav-tabs">';
+echo '<li class="nav-item"><a class="nav-link' . ($tab=='users'?' active':'') . '" href="?tab=users">Utilisateurs</a></li>';
+echo '<li class="nav-item"><a class="nav-link' . ($tab=='properties'?' active':'') . '" href="?tab=properties">Propriétés</a></li>';
+echo '<li class="nav-item"><a class="nav-link' . ($tab=='bookings'?' active':'') . '" href="?tab=bookings">Réservations</a></li>';
+echo '<li class="nav-item"><a class="nav-link' . ($tab=='reviews'?' active':'') . '" href="?tab=reviews">Avis</a></li>';
+echo '</ul>';
+
+if ($tab === 'users') {
+    $users = mysqli_query($conn, "SELECT id, username, email, user_type FROM users ORDER BY id DESC");
+    echo '<h4 class="mt-3">Utilisateurs</h4><table class="table table-bordered"><tr><th>ID</th><th>Nom</th><th>Email</th><th>Type</th><th>Action</th></tr>';
+    while ($u = mysqli_fetch_assoc($users)) {
+        echo '<tr><td>'.$u['id'].'</td><td>'.$u['username'].'</td><td>'.$u['email'].'</td><td>'.$u['user_type'].'</td>';
+        echo '<td>';
+        if ($u['id'] != $user_id) {
+            echo '<a href="?delete='.$u['id'].'&delete_type=user" class="btn btn-danger btn-sm" onclick="return confirm(\'Supprimer cet utilisateur ?\')">Supprimer</a>';
+        } else {
+            echo '<span class="text-muted">Admin</span>';
+        }
+        echo '</td></tr>';
+    }
+    echo '</table>';
+} elseif ($tab === 'properties') {
+    $properties = mysqli_query($conn, "SELECT p.id, p.title, u.username as owner FROM properties p JOIN users u ON p.owner_id = u.id ORDER BY p.id DESC");
+    echo '<h4 class="mt-3">Propriétés</h4><table class="table table-bordered"><tr><th>ID</th><th>Titre</th><th>Propriétaire</th><th>Action</th></tr>';
+    while ($p = mysqli_fetch_assoc($properties)) {
+        echo '<tr><td>'.$p['id'].'</td><td>'.$p['title'].'</td><td>'.$p['owner'].'</td>';
+        echo '<td><a href="?type=property&id='.$p['id'].'" class="btn btn-primary btn-sm">Éditer</a> ';
+        echo '<a href="?delete='.$p['id'].'&delete_type=property" class="btn btn-danger btn-sm" onclick="return confirm(\'Supprimer cette propriété ?\')">Supprimer</a></td></tr>';
+    }
+    echo '</table>';
+} elseif ($tab === 'bookings') {
+    $bookings = mysqli_query($conn, "SELECT b.id, p.title as property, u.username as user, b.start_date, b.end_date FROM bookings b JOIN properties p ON b.property_id = p.id JOIN users u ON b.user_id = u.id ORDER BY b.id DESC");
+    echo '<h4 class="mt-3">Réservations</h4><table class="table table-bordered"><tr><th>ID</th><th>Propriété</th><th>Utilisateur</th><th>Début</th><th>Fin</th><th>Action</th></tr>';
+    while ($b = mysqli_fetch_assoc($bookings)) {
+        echo '<tr><td>'.$b['id'].'</td><td>'.$b['property'].'</td><td>'.$b['user'].'</td><td>'.$b['start_date'].'</td><td>'.$b['end_date'].'</td>';
+        echo '<td><a href="?type=booking&id='.$b['id'].'" class="btn btn-primary btn-sm">Éditer</a> ';
+        echo '<a href="?delete='.$b['id'].'&delete_type=booking" class="btn btn-danger btn-sm" onclick="return confirm(\'Supprimer cette réservation ?\')">Supprimer</a></td></tr>';
+    }
+    echo '</table>';
+} elseif ($tab === 'reviews') {
+    $reviews = mysqli_query($conn, "SELECT r.id, p.title as property, u.username as user, r.rating FROM reviews r JOIN bookings b ON r.booking_id = b.id JOIN users u ON b.user_id = u.id JOIN properties p ON b.property_id = p.id ORDER BY r.id DESC");
+    echo '<h4 class="mt-3">Avis</h4><table class="table table-bordered"><tr><th>ID</th><th>Propriété</th><th>Utilisateur</th><th>Note</th><th>Action</th></tr>';
+    while ($r = mysqli_fetch_assoc($reviews)) {
+        echo '<tr><td>'.$r['id'].'</td><td>'.$r['property'].'</td><td>'.$r['user'].'</td><td>'.$r['rating'].'</td>';
+        echo '<td><a href="?type=review&id='.$r['id'].'" class="btn btn-primary btn-sm">Éditer</a> ';
+        echo '<a href="?delete='.$r['id'].'&delete_type=review" class="btn btn-danger btn-sm" onclick="return confirm(\'Supprimer cet avis ?\')">Supprimer</a></td></tr>';
+    }
+    echo '</table>';
+}
+echo '</div>';
+
+include_once "../includes/footer.php";
+
 ?>
+
+
+
 
 
 
