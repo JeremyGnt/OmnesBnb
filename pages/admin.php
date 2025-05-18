@@ -316,6 +316,63 @@
                     </div>
                 </div>
             </div>
+            <!-- commentaire Tab -->
+            <div class="tab-pane fade <?= $active_tab == 'reviews' ? 'show active' : '' ?>" id="reviews-tab">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">Gestion des avis</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Propriété</th>
+                                    <th>Auteur</th>
+                                    <th>Note</th>
+                                    <th>Commentaire</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <?php foreach ($reviews as $review): ?>
+                                    <tr>
+                                        <td><?= $review['id'] ?></td>
+                                        <td>
+                                            <a href="property-details.php?id=<?= $review['property_id'] ?>">
+                                                <?= htmlspecialchars($review['property_title']) ?>
+                                            </a>
+                                        </td>
+                                        <td><?= htmlspecialchars($review['reviewer_name']) ?></td>
+                                        <td>
+                                            <?php for($i = 0; $i < $review['rating']; $i++): ?>
+                                                <i class="fas fa-star text-warning"></i>
+                                            <?php endfor; ?>
+                                            <?php for($i = $review['rating']; $i < 5; $i++): ?>
+                                                <i class="far fa-star text-warning"></i>
+                                            <?php endfor; ?>
+                                        </td>
+                                        <td><?= htmlspecialchars($review['comment']) ?></td>
+                                        <td><?= date('d/m/Y H:i', strtotime($review['created_at'])) ?></td>
+                                        <td>
+                                            <a href="edit_review.php?id=<?= $review['id'] ?>" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-edit"></i> Modifier
+                                            </a>
+                                            <button class="btn btn-sm btn-outline-danger"
+                                                    onclick="confirmDelete('review', <?= $review['id'] ?>, 'Avis #<?= $review['id'] ?>')">
+                                                <i class="fas fa-trash"></i> Supprimer
+                                            </button>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </main>
     </div>
 </div>
