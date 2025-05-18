@@ -17,11 +17,11 @@ include "../includes/header.php";
 echo '<link rel="stylesheet" href="../css/profile.css">';
 
 $user_id = $_SESSION["user_id"];
-$username = $email = $first_name = $last_name = $phone = "";
+$email = $first_name = $last_name = $phone = "";
 
 $profile_image = "assets/profile_images/default.jpg";
 
-$sql = "SELECT username, email, first_name, last_name, phone_number, profile_image FROM users WHERE id = ?";
+$sql = "SELECT email, first_name, last_name, phone_number, profile_image FROM users WHERE id = ?";
 
 if($stmt = mysqli_prepare($conn, $sql)){
     mysqli_stmt_bind_param($stmt, "i", $param_id);
@@ -32,7 +32,7 @@ if($stmt = mysqli_prepare($conn, $sql)){
         mysqli_stmt_store_result($stmt);
 
         if(mysqli_stmt_num_rows($stmt) == 1){
-            mysqli_stmt_bind_result($stmt, $username, $email, $first_name, $last_name, $phone, $user_profile_image);
+            mysqli_stmt_bind_result($stmt, $email, $first_name, $last_name, $phone, $user_profile_image);
 
             if(mysqli_stmt_fetch($stmt)){
                 if(!empty($user_profile_image)) {
@@ -52,35 +52,7 @@ if($stmt = mysqli_prepare($conn, $sql)){
 }
 
 if($_SERVER["REQUEST_METHOD"] == "POST") {
-    $username_err = $email_err = $first_name_err = $last_name_err = $phone_err = $current_password_err = $new_password_err = $confirm_password_err = "";
-
-    if (empty(trim($_POST["username"]))) {
-        $username_err = "Veuillez entrer un nom d'utilisateur.";
-    } else {
-        $username = trim($_POST["username"]);
-
-        if ($username != $_SESSION["username"]) {
-            $sql = "SELECT id FROM users WHERE username = ? AND id != ?";
-
-            if ($stmt = mysqli_prepare($conn, $sql)) {
-                mysqli_stmt_bind_param($stmt, "si", $param_username, $param_id);
-                $param_username = $username;
-                $param_id = $user_id;
-
-                if (mysqli_stmt_execute($stmt)) {
-                    mysqli_stmt_store_result($stmt);
-
-                    if (mysqli_stmt_num_rows($stmt) == 1) {
-                        $username_err = "Ce nom d'utilisateur est déjà utilisé.";
-                    }
-                } else {
-                    echo "Oops! Une erreur est survenue. Veuillez réessayer plus tard.";
-                }
-
-                mysqli_stmt_close($stmt);
-            }
-        }
-    }
+    $email_err = $first_name_err = $last_name_err = $phone_err = $current_password_err = $new_password_err = $confirm_password_err = "";
 
     if (empty(trim($_POST["email"]))) {
         $email_err = "Veuillez entrer un email.";
@@ -201,14 +173,14 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    if (empty($username_err) && empty($email_err) && empty($first_name_err) && empty($last_name_err) && empty($phone_err) &&
+    if (empty($email_err) && empty($first_name_err) && empty($last_name_err) && empty($phone_err) &&
         empty($current_password_err) && empty($new_password_err) && empty($confirm_password_err)) {
 
         if (!empty($current_password) && !empty($new_password) && !empty($confirm_password)) {
-            $sql = "UPDATE users SET username = ?, email = ?, first_name = ?, last_name = ?, phone_number = ?, password = ?" .
+            $sql = "UPDATE users SET email = ?, first_name = ?, last_name = ?, phone_number = ?, password = ?" .
                 ($upload_image ? ", profile_image = ?" : "") . " WHERE id = ?";
         } else {
-            $sql = "UPDATE users SET username = ?, email = ?, first_name = ?, last_name = ?, phone_number = ?" .
+            $sql = "UPDATE users SET email = ?, first_name = ?, last_name = ?, phone_number = ?" .
                 ($upload_image ? ", profile_image = ?" : "") . " WHERE id = ?";
         }
         if($stmt = mysqli_prepare($conn, $sql)){
@@ -216,8 +188,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
                 if($upload_image){
                     mysqli_stmt_bind_param(
                         $stmt,
-                        "ssssssi",
-                        $param_username,
+                        "sssssii",
                         $param_email,
                         $param_first_name,
                         $param_last_name,
@@ -230,8 +201,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
                 } else {
                     mysqli_stmt_bind_param(
                         $stmt,
-                        "sssssi",
-                        $param_username,
+                        "ssssi",
                         $param_email,
                         $param_first_name,
                         $param_last_name,
@@ -245,8 +215,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
                 if($upload_image){
                     mysqli_stmt_bind_param(
                         $stmt,
-                        "ssssssi",
-                        $param_username,
+                        "sssssii",
                         $param_email,
                         $param_first_name,
                         $param_last_name,
@@ -257,8 +226,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
                     $param_profile_image = $new_profile_image;
                 } else {                    mysqli_stmt_bind_param(
                     $stmt,
-                    "sssssi",
-                    $param_username,
+                    "ssssi",
                     $param_email,
                     $param_first_name,
                     $param_last_name,
@@ -268,7 +236,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
                 }
             }
 
-            $param_username = $username;
             $param_email = $email;
             $param_first_name = $first_name;
             $param_last_name = $last_name;
@@ -276,7 +243,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
             $param_id = $user_id;
 
             if(mysqli_stmt_execute($stmt)){
-                $_SESSION["username"] = $username;
                 $_SESSION["email"] = $email;
                 $_SESSION["first_name"] = $first_name;
                 $_SESSION["last_name"] = $last_name;
@@ -345,14 +311,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
                                             <?php echo $last_name_err ?? ''; ?>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-
-                            <div class="form-floating mb-3">
-                                <input type="text" name="username" class="form-control <?php echo (!empty($username_err)) ? 'is-invalid' : ''; ?>" value="<?php echo htmlspecialchars($username); ?>" id="username" placeholder="Nom d'utilisateur">
-                                <label for="username">Nom d'utilisateur</label>
-                                <div class="invalid-feedback">
-                                    <?php echo $username_err ?? ''; ?>
                                 </div>
                             </div>
 

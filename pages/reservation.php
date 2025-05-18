@@ -56,7 +56,7 @@ if(isset($_GET['cancel']) && !empty($_GET['cancel'])) {
 }
 
 $upcoming_reservations = [];
-$upcoming_sql = "SELECT b.*, p.title, p.main_image, p.location, p.price, u.username as owner_name, u.id as owner_id 
+$upcoming_sql = "SELECT b.*, p.title, p.main_image, p.location, p.price, u.last_name as owner_name, u.id as owner_id 
                  FROM bookings b 
                  JOIN properties p ON b.property_id = p.id 
                  JOIN users u ON p.owner_id = u.id 
@@ -78,7 +78,7 @@ if($stmt = mysqli_prepare($conn, $upcoming_sql)) {
 
 // Récupérer les réservations passées de l'utilisateur
 $past_reservations = [];
-$past_sql = "SELECT b.*, p.title, p.main_image, p.location, p.price, u.username as owner_name, u.id as owner_id
+$past_sql = "SELECT b.*, p.title, p.main_image, p.location, p.price, u.last_name as owner_name, u.id as owner_id
              FROM bookings b 
              JOIN properties p ON b.property_id = p.id 
              JOIN users u ON p.owner_id = u.id 
@@ -100,7 +100,7 @@ if($stmt = mysqli_prepare($conn, $past_sql)) {
 
 // Récupérer les réservations annulées
 $cancelled_reservations = [];
-$cancelled_sql = "SELECT b.*, p.title, p.main_image, p.location, p.price, u.username as owner_name, u.id as owner_id 
+$cancelled_sql = "SELECT b.*, p.title, p.main_image, p.location, p.price, u.last_name as owner_name, u.id as owner_id 
                   FROM bookings b
                   JOIN properties p ON b.property_id = p.id 
                   JOIN users u ON p.owner_id = u.id 

@@ -118,7 +118,7 @@ if ($type && $id) {
         $booking_result = mysqli_stmt_get_result($booking_stmt);
         $booking = mysqli_fetch_assoc($booking_result);
         $properties = mysqli_query($conn, "SELECT id, title FROM properties ORDER BY title");
-        $users = mysqli_query($conn, "SELECT id, username FROM users ORDER BY username");
+        $users = mysqli_query($conn, "SELECT id, last_name FROM users ORDER BY last_name");
         echo '<div class="container mt-4"><h3>Éditer une réservation</h3><form method="post">';
         echo '<label>Propriété</label><select name="property_id" class="form-control">';
         while ($p = mysqli_fetch_assoc($properties)) {
@@ -129,7 +129,7 @@ if ($type && $id) {
         echo '<label>Utilisateur</label><select name="user_id" class="form-control">';
         while ($u = mysqli_fetch_assoc($users)) {
             $sel = $u['id'] == $booking['user_id'] ? 'selected' : '';
-            echo "<option value='{$u['id']}' $sel>{$u['username']}</option>";
+            echo "<option value='{$u['id']}' $sel>{$u['last_name']}</option>";
         }
         echo '</select>';
         echo '<label>Date début</label><input type="date" name="start_date" class="form-control" value="' . $booking['start_date'] . '">';
@@ -146,7 +146,7 @@ if ($type && $id) {
         mysqli_stmt_execute($property_stmt);
         $property_result = mysqli_stmt_get_result($property_stmt);
         $property = mysqli_fetch_assoc($property_result);
-        $owners = mysqli_query($conn, "SELECT id, username FROM users ORDER BY username");
+        $owners = mysqli_query($conn, "SELECT id, last_name FROM users ORDER BY last_name");
         echo '<div class="container mt-4"><h3>Éditer une propriété</h3><form method="post">';
         echo '<label>Titre</label><input type="text" name="title" class="form-control" value="' . $property['title'] . '">';
         echo '<label>Description</label><textarea name="description" class="form-control">' . $property['description'] . '</textarea>';
@@ -165,7 +165,7 @@ if ($type && $id) {
         echo '<label>Propriétaire</label><select name="owner_id" class="form-control">';
         while ($o = mysqli_fetch_assoc($owners)) {
             $sel = $o['id'] == $property['owner_id'] ? 'selected' : '';
-            echo "<option value='{$o['id']}' $sel>{$o['username']}</option>";
+            echo "<option value='{$o['id']}' $sel>{$o['last_name']}</option>";
         }
         echo '</select>';
         echo '<button type="submit" class="btn btn-primary mt-2">Enregistrer</button>';
@@ -195,10 +195,10 @@ echo '<li class="nav-item"><a class="nav-link' . ($tab=='reviews'?' active':'') 
 echo '</ul>';
 
 if ($tab === 'users') {
-    $users = mysqli_query($conn, "SELECT id, username, email, user_type FROM users ORDER BY id DESC");
+    $users = mysqli_query($conn, "SELECT id, last_name, email, user_type FROM users ORDER BY id DESC");
     echo '<h4 class="mt-3">Utilisateurs</h4><table class="table table-bordered"><tr><th>ID</th><th>Nom</th><th>Email</th><th>Type</th><th>Action</th></tr>';
     while ($u = mysqli_fetch_assoc($users)) {
-        echo '<tr><td>'.$u['id'].'</td><td>'.$u['username'].'</td><td>'.$u['email'].'</td><td>'.$u['user_type'].'</td>';
+        echo '<tr><td>'.$u['id'].'</td><td>'.$u['last_name'].'</td><td>'.$u['email'].'</td><td>'.$u['user_type'].'</td>';
         echo '<td>';
         if ($u['id'] != $user_id) {
             echo '<a href="?delete='.$u['id'].'&delete_type=user" class="btn btn-danger btn-sm" onclick="return confirm(\'Supprimer cet utilisateur ?\')">Supprimer</a>';
@@ -209,7 +209,7 @@ if ($tab === 'users') {
     }
     echo '</table>';
 } elseif ($tab === 'properties') {
-    $properties = mysqli_query($conn, "SELECT p.id, p.title, u.username as owner FROM properties p JOIN users u ON p.owner_id = u.id ORDER BY p.id DESC");
+    $properties = mysqli_query($conn, "SELECT p.id, p.title, u.last_name as owner FROM properties p JOIN users u ON p.owner_id = u.id ORDER BY p.id DESC");
     echo '<h4 class="mt-3">Propriétés</h4><table class="table table-bordered"><tr><th>ID</th><th>Titre</th><th>Propriétaire</th><th>Action</th></tr>';
     while ($p = mysqli_fetch_assoc($properties)) {
         echo '<tr><td>'.$p['id'].'</td><td>'.$p['title'].'</td><td>'.$p['owner'].'</td>';
@@ -218,7 +218,7 @@ if ($tab === 'users') {
     }
     echo '</table>';
 } elseif ($tab === 'bookings') {
-    $bookings = mysqli_query($conn, "SELECT b.id, p.title as property, u.username as user, b.start_date, b.end_date FROM bookings b JOIN properties p ON b.property_id = p.id JOIN users u ON b.user_id = u.id ORDER BY b.id DESC");
+    $bookings = mysqli_query($conn, "SELECT b.id, p.title as property, u.last_name as user, b.start_date, b.end_date FROM bookings b JOIN properties p ON b.property_id = p.id JOIN users u ON b.user_id = u.id ORDER BY b.id DESC");
     echo '<h4 class="mt-3">Réservations</h4><table class="table table-bordered"><tr><th>ID</th><th>Propriété</th><th>Utilisateur</th><th>Début</th><th>Fin</th><th>Action</th></tr>';
     while ($b = mysqli_fetch_assoc($bookings)) {
         echo '<tr><td>'.$b['id'].'</td><td>'.$b['property'].'</td><td>'.$b['user'].'</td><td>'.$b['start_date'].'</td><td>'.$b['end_date'].'</td>';
@@ -227,7 +227,7 @@ if ($tab === 'users') {
     }
     echo '</table>';
 } elseif ($tab === 'reviews') {
-    $reviews = mysqli_query($conn, "SELECT r.id, p.title as property, u.username as user, r.rating FROM reviews r JOIN bookings b ON r.booking_id = b.id JOIN users u ON b.user_id = u.id JOIN properties p ON b.property_id = p.id ORDER BY r.id DESC");
+    $reviews = mysqli_query($conn, "SELECT r.id, p.title as property, u.last_name as user, r.rating FROM reviews r JOIN bookings b ON r.booking_id = b.id JOIN users u ON b.user_id = u.id JOIN properties p ON b.property_id = p.id ORDER BY r.id DESC");
     echo '<h4 class="mt-3">Avis</h4><table class="table table-bordered"><tr><th>ID</th><th>Propriété</th><th>Utilisateur</th><th>Note</th><th>Action</th></tr>';
     while ($r = mysqli_fetch_assoc($reviews)) {
         echo '<tr><td>'.$r['id'].'</td><td>'.$r['property'].'</td><td>'.$r['user'].'</td><td>'.$r['rating'].'</td>';

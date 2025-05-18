@@ -10,9 +10,6 @@ if (isset($_SESSION["user_id"])) {
 
 require_once "../includes/db_connection.php";
 
-include "../includes/header.php";
-echo '<link rel="stylesheet" href="../css/register.css">';
-
 $email = $password = $confirm_password = $first_name = $last_name = "";
 $email_err = $password_err = $confirm_password_err = $first_name_err = $last_name_err = $terms_err = "";
 
@@ -23,7 +20,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $email = trim($_POST["email"]);
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $email_err = "Format d'email invalide.";
-        } elseif (!preg_match("/@(omnesintervenant\.com|ece\.fr|edu\.ece\.fr)$/", $email)) {
+        } elseif (!preg_match("/@(omnesintervenant\\.com|ece\\.fr|edu\\.ece\\.fr)$/", $email)) {
             $email_err = "Seules les adresses email d'Omnes sont autorisées.";
         } else {
             $sql = "SELECT id FROM users WHERE email = ?";
@@ -72,8 +69,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (!isset($_POST['terms'])) {
         $terms_err = "Vous devez accepter les conditions pour vous inscrire.";
-    }    if (empty($email_err) && empty($password_err) && empty($confirm_password_err) && empty($first_name_err) && empty($last_name_err) && empty($terms_err)) {
-        $user_type = preg_match("/@(ece\.fr|omnesintervenant\.com)$/", $email) ? 'staff' : 'student';
+    }
+    if (empty($email_err) && empty($password_err) && empty($confirm_password_err) && empty($first_name_err) && empty($last_name_err) && empty($terms_err)) {
+        $user_type = preg_match("/@(ece\\.fr|omnesintervenant\\.com)$/", $email) ? 'staff' : 'student';
         // Définir l'image de profil par défaut
         $default_profile_image = "assets/profile_images/default-profile.jpg";
         
@@ -90,6 +88,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $_SESSION['message'] = "Inscription réussie. Vous pouvez maintenant vous connecter.";
                 $_SESSION['message_type'] = "success";
                 header("location: login.php");
+                exit;
             }
             mysqli_stmt_close($stmt);
         }
@@ -97,6 +96,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     mysqli_close($conn);
 }
+
+include "../includes/header.php";
+echo '<link rel="stylesheet" href="../css/register.css">';
 ?>
 
 

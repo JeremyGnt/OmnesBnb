@@ -32,7 +32,7 @@ if ($stmt = mysqli_prepare($conn, $properties_sql)) {
         while ($property = mysqli_fetch_assoc($result)) {
             // Récupérer les réservations pour cette propriété
             $property['bookings'] = [];
-            $bookings_sql = "SELECT b.*, u.first_name, u.last_name, u.username
+            $bookings_sql = "SELECT b.*, u.first_name, u.last_name
                             FROM bookings b
                             JOIN users u ON b.user_id = u.id
                             WHERE b.property_id = ? AND b.status != 'cancelled'";

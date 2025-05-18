@@ -37,7 +37,7 @@ if (session_status() == PHP_SESSION_NONE) {
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="fas fa-user-circle me-2"></i><?php echo htmlspecialchars($_SESSION['username']); ?>
+                            <i class="fas fa-user-circle me-2"></i><?php echo htmlspecialchars($_SESSION['last_name']); ?>
                         </a>                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                             <li><a class="dropdown-item" href="/omnesbnb-equipe-2h/pages/profile.php"><i class="fas fa-user me-2"></i>Mon profil</a></li>
                             <?php

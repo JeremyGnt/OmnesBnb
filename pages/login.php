@@ -34,21 +34,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     if (empty($email_err) && empty($password_err)) {
-        $sql = "SELECT id, username, email, password, first_name, last_name, phone_number, profile_image, user_type, is_verified FROM users WHERE email = ?";
+        $sql = "SELECT id, email, password, first_name, last_name, phone_number, profile_image, user_type, is_verified FROM users WHERE email = ?";
         if ($stmt = mysqli_prepare($conn, $sql)) {
             mysqli_stmt_bind_param($stmt, "s", $email);
             if (mysqli_stmt_execute($stmt)) {
                 mysqli_stmt_store_result($stmt);
                 if (mysqli_stmt_num_rows($stmt) == 1) {
-                    mysqli_stmt_bind_result($stmt, $id, $username, $email, $hashed_password, $first_name, $last_name, $phone_number, $profile_image, $user_type, $is_verified);
+                    mysqli_stmt_bind_result($stmt, $id, $email, $hashed_password, $first_name, $last_name, $phone_number, $profile_image, $user_type, $is_verified);
                     if (mysqli_stmt_fetch($stmt)) {
                         if (password_verify($password, $hashed_password)) {
                             $_SESSION["user_id"] = $id;
-                            $_SESSION["username"] = $username;
                             $_SESSION["email"] = $email;
                             $_SESSION["first_name"] = $first_name;
                             $_SESSION["last_name"] = $last_name;
-                            $_SESSION["phone_number"] = $phone_number;                            $_SESSION["profile_image"] = $profile_image;
+                            $_SESSION["phone_number"] = $phone_number;
+                            $_SESSION["profile_image"] = $profile_image;
                             $_SESSION["user_type"] = $user_type;
                             $_SESSION["is_verified"] = $is_verified;
                             // Utiliser la redirection JavaScript au lieu de header()
