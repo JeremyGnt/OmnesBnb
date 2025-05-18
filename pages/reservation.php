@@ -290,11 +290,9 @@ if($stmt = mysqli_prepare($conn, $cancelled_sql)) {
                                 </p>
                                 <p class="card-text">
                                     <small class="text-muted">Total payé: <?php echo number_format($reservation['total_price'], 2, ',', ' '); ?> €</small>
-                                </p>                                    <div class="action-buttons mt-3">
-                                    <!-- Ajout du bouton pour contacter le propriétaire -->
-                                    <a href="messages.php?property_id=<?php echo $reservation['property_id']; ?>&receiver_id=<?php echo $reservation['owner_id']; ?>" class="btn btn-sm btn-outline-secondary">
-                                        <i class="fas fa-comment-alt me-1"></i> Contacter l'hôte
-                                    </a>
+                                </p>
+                                <!-- Suppression du bouton contacter l'hôte pour les réservations passées -->
+                                <div class="action-buttons mt-3">
                                     <?php if(!isset($reservation['has_review'])): ?>
                                         <a href="review.php?booking_id=<?php echo $reservation['id']; ?>" class="btn btn-sm btn-outline-success">
                                             Laisser un avis
@@ -344,12 +342,7 @@ if($stmt = mysqli_prepare($conn, $cancelled_sql)) {
                                 </p>
                                 <p class="card-text">
                                     <small class="text-muted">Annulé le <?php echo date('d/m/Y', strtotime($reservation['updated_at'])); ?></small>
-                                </p>                                    <div class="action-buttons mt-3">
-                                    <!-- Ajout du bouton pour contacter le propriétaire -->
-                                    <a href="messages.php?property_id=<?php echo $reservation['property_id']; ?>&receiver_id=<?php echo $reservation['owner_id']; ?>" class="btn btn-sm btn-outline-secondary">
-                                        <i class="fas fa-comment-alt me-1"></i> Contacter l'hôte
-                                    </a>
-                                </div>
+                                </p>
                             </div>
                         </div>
                     </div>

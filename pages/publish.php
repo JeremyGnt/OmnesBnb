@@ -16,6 +16,7 @@ include "../includes/header.php";
 
 $title = $location = $description = $price = $start_date = $end_date = $max_guests = $type = "";
 $title_err = $location_err = $description_err = $price_err = $start_date_err = $end_date_err = $max_guests_err = $type_err = $image_err = "";
+$address_err = $city_err = $postal_code_err = "";
 
 if($_SERVER["REQUEST_METHOD"] == "POST"){
 
@@ -84,6 +85,24 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         $type = $_POST["type"];
     }
 
+    if(empty(trim($_POST["address"]))) {
+        $address_err = "Veuillez entrer l'adresse complète du logement.";
+    } else {
+        $address = trim($_POST["address"]);
+    }
+    if(empty(trim($_POST["city"]))) {
+        $city_err = "Veuillez entrer la ville du logement.";
+    } else {
+        $city = trim($_POST["city"]);
+    }
+    if(empty(trim($_POST["postal_code"]))) {
+        $postal_code_err = "Veuillez entrer le code postal du logement.";
+    } elseif(!preg_match('/^\d{5}$/', trim($_POST["postal_code"]))) {
+        $postal_code_err = "Le code postal doit comporter 5 chiffres.";
+    } else {
+        $postal_code = trim($_POST["postal_code"]);
+    }
+
     $upload_dir = "../assets/property_images/";
     $uploaded_images = [];
     $image_errors = [];
@@ -139,11 +158,13 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     // Les équipements ont été supprimés
 
     if(empty($title_err) && empty($location_err) && empty($description_err) && empty($price_err) &&
-        empty($start_date_err) && empty($end_date_err) && empty($max_guests_err) && empty($type_err) && empty($image_err)){
+        empty($start_date_err) && empty($end_date_err) && empty($max_guests_err) && empty($type_err) && empty($image_err)
+        && empty($address_err) && empty($city_err) && empty($postal_code_err)){
 //VALUERS DéFAUT
-        $address = $location;
-        $city = "Paris";
-        $postal_code = "75000";
+        // Remove old default assignment:
+        // $address = $location;
+        // $city = "Paris";
+        // $postal_code = "75000";
 
         if(preg_match('/Paris (\d+)(ème|e|er)/i', $location, $matches)) {
             $city = "Paris";
@@ -277,21 +298,30 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                     <div class="row mb-3">
                         <div class="col-md-8">
                             <div class="form-floating">
-                                <input type="text" name="address" class="form-control" value="<?php echo isset($_POST['address']) ? htmlspecialchars($_POST['address']) : ''; ?>" id="address" placeholder="Adresse complète" required>
+                                <input type="text" name="address" class="form-control <?php echo (!empty($address_err)) ? 'is-invalid' : ''; ?>" value="<?php echo isset($_POST['address']) ? htmlspecialchars($_POST['address']) : ''; ?>" id="address" placeholder="Adresse complète" required>
                                 <label for="address">Adresse complète*</label>
+                                <div class="invalid-feedback">
+                                    <?php echo $address_err; ?>
+                                </div>
                             </div>
                         </div>
                         <div class="col-md-4">
                             <div class="form-floating">
-                                <input type="text" name="postal_code" class="form-control" value="<?php echo isset($_POST['postal_code']) ? htmlspecialchars($_POST['postal_code']) : ''; ?>" id="postal_code" placeholder="Code postal" required pattern="\d{5}">
+                                <input type="text" name="postal_code" class="form-control <?php echo (!empty($postal_code_err)) ? 'is-invalid' : ''; ?>" value="<?php echo isset($_POST['postal_code']) ? htmlspecialchars($_POST['postal_code']) : ''; ?>" id="postal_code" placeholder="Code postal" required pattern="\d{5}">
                                 <label for="postal_code">Code postal*</label>
+                                <div class="invalid-feedback">
+                                    <?php echo $postal_code_err; ?>
+                                </div>
                             </div>
                         </div>
                     </div>
 
                     <div class="form-floating mb-3">
-                        <input type="text" name="city" class="form-control" value="Paris" id="city" placeholder="Ville" required>
+                        <input type="text" name="city" class="form-control <?php echo (!empty($city_err)) ? 'is-invalid' : ''; ?>" value="Paris" id="city" placeholder="Ville" required>
                         <label for="city">Ville*</label>
+                        <div class="invalid-feedback">
+                            <?php echo $city_err; ?>
+                        </div>
                     </div>
 
                     <div class="form-floating mb-3">
