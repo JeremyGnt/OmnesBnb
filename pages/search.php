@@ -1,6 +1,10 @@
 <?php
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 
 require_once "../includes/db_connection.php";
+
 include_once "../includes/header.php";
 
 echo '<link rel="stylesheet" href="../css/search.css">';
@@ -250,9 +254,10 @@ $db_max_price = $max_price_row['max_price'];
                                 </div>
                             </a>
                         </div>
-                    <?php endwhile; ?>
-                </div>
+                    <?php endwhile; ?>                </div>
             <?php endif; ?>
         </div>
     </div>
 </div>
+
+<?php include "../includes/footer.php"; ?>

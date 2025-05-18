@@ -1,11 +1,16 @@
 <?php
-require_once "../includes/db_connection.php";
-include "../includes/header.php";
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 
 if (isset($_SESSION["user_id"])) {
     header("location: ../index.php");
     exit;
 }
+
+require_once "../includes/db_connection.php";
+
+include "../includes/header.php";
 
 $email = $password = $confirm_password = $first_name = $last_name = "";
 $email_err = $password_err = $confirm_password_err = $first_name_err = $last_name_err = $terms_err = "";

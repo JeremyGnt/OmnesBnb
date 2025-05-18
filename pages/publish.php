@@ -1,6 +1,7 @@
 <?php
-require_once "../includes/db_connection.php";
-include "../includes/header.php";
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 
 if (!isset($_SESSION["user_id"])) {
     $_SESSION["message"] = "Vous devez vous connecter pour publier un logement.";
@@ -8,6 +9,10 @@ if (!isset($_SESSION["user_id"])) {
     header("location: login.php");
     exit;
 }
+
+require_once "../includes/db_connection.php";
+
+include "../includes/header.php";
 
 $title = $location = $description = $price = $start_date = $end_date = $max_guests = $type = "";
 $title_err = $location_err = $description_err = $price_err = $start_date_err = $end_date_err = $max_guests_err = $type_err = $image_err = "";
@@ -131,7 +136,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     } elseif(!empty($image_errors)){
         $image_err = implode("<br>", $image_errors);
     }
-    error_log("Équipements reçus : " . (isset($_POST["amenities"]) ? print_r($_POST["amenities"], true) : "aucun"));
+    // Les équipements ont été supprimés
 
     if(empty($title_err) && empty($location_err) && empty($description_err) && empty($price_err) &&
         empty($start_date_err) && empty($end_date_err) && empty($max_guests_err) && empty($type_err) && empty($image_err)){
@@ -226,11 +231,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                     mysqli_stmt_bind_param($activity_stmt, "isi", $_SESSION["user_id"], $activity_type, $property_id);
                     mysqli_stmt_execute($activity_stmt);
                     mysqli_stmt_close($activity_stmt);
-                }
-
-                $_SESSION["message"] = "Votre logement a été publié avec succès!";
+                }                $_SESSION["message"] = "Votre logement a été publié avec succès!";
                 $_SESSION["message_type"] = "success";
-                header("location: my-rentals.php");
+                echo "<script>window.location.href='my-rentals.php';</script>";
                 exit;
             } else {
                 $_SESSION["message"] = "Une erreur s'est produite lors de la publication du logement.";
@@ -297,7 +300,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                         <div class="invalid-feedback">
                             <?php echo $description_err; ?>
                         </div>
-                        <div class="form-text">Décrivez votre logement, ses équipements, et les modalités de location (minimum 30 caractères).</div>
+                        <div class="form-text">Décrivez votre logement et les modalités de location (minimum 30 caractères).</div>
                     </div>
 
                     <div class="row mb-3">
@@ -383,42 +386,13 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                                 <strong>Je libère mon logement</strong> - J'annonce que mon logement sera disponible (information seulement)
                             </label>
                         </div>
-                    </div>
-                    <div class="invalid-feedback <?php echo (!empty($type_err)) ? 'd-block' : ''; ?>">
+                    </div>                    <div class="invalid-feedback <?php echo (!empty($type_err)) ? 'd-block' : ''; ?>">
                         <?php echo $type_err ?: 'Veuillez sélectionner un type de logement.'; // Provide default message if $type_err is empty but field is invalid ?>
                     </div>
 
-
-                    <h5 class="mb-3 mt-4">Équipements</h5>
-                    <p class="text-muted small mb-3">Sélectionnez les équipements disponibles dans votre logement</p>
-
-                    <div class="amenities-container row mb-4">
-                        <?php                        $all_amenities = [
-                            'Wi-Fi' => 'fa-wifi', 'Télévision' => 'fa-tv', 'Cuisine équipée' => 'fa-utensils',
-                            'Machine à laver' => 'fa-tshirt', 'Sèche-linge' => 'fa-wind', 'Climatisation' => 'fa-snowflake',
-                            'Chauffage' => 'fa-temperature-high', 'Espace de travail' => 'fa-laptop', 'Parking' => 'fa-parking',
-                            'Ascenseur' => 'fa-elevator', 'Balcon' => 'fa-cloud-sun', 'Salle de bain privée' => 'fa-bath'
-                        ];
-                        $selected_amenities = isset($_POST['amenities']) && is_array($_POST['amenities']) ? $_POST['amenities'] : [];
-
-                        foreach ($all_amenities as $amenity => $icon) {
-                            $checked = in_array($amenity, $selected_amenities) ? 'checked' : '';
-                            echo "<div class='col-6 col-md-4 col-lg-3 mb-3'>
-                                    <div class='amenity-item' data-amenity='{$amenity}'>
-                                        <i class='fas {$icon}'></i>
-                                        <span>{$amenity}</span>
-                                        <input type='checkbox' name='amenities[]' value='{$amenity}' class='d-none' {$checked}>
-                                    </div>
-                                  </div>";
-                        }
-                        ?>
-                    </div>
-
                     <h5 class="mb-3 mt-4">Photos*</h5>
-                    <p class="text-muted small mb-3">Ajoutez des photos attrayantes de votre logement (première photo = photo principale)</p>
-
-                    <div class="image-upload-wrapper mb-3 <?php echo (!empty($image_err)) ? 'is-invalid' : ''; ?>">
-                        <div class="image-upload-container">
+                    <p class="text-muted small mb-3">Ajoutez des photos attrayantes de votre logement (première photo = photo principale)</p>                    <div class="image-upload-wrapper mb-3 <?php echo (!empty($image_err)) ? 'is-invalid' : ''; ?>">
+                        <div class="image-upload-container" id="dropzone">
                             <i class="fas fa-images fa-2x mb-2"></i>
                             <p class="mb-1">Glissez et déposez vos images ici</p>
                             <p class="text-muted small">ou</p>

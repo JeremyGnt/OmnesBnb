@@ -1,13 +1,8 @@
 <?php
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 
-require_once "../includes/db_connection.php";
-include "../includes/header.php";
-
-// CSS et JavaScript spécifiques à la page de réservation
-echo '<link rel="stylesheet" href="../css/reservation.css?v='.time().'">';
-echo '<script src="../js/reservation.js?v='.time().'" defer></script>';
-
-// Vérifier si l'utilisateur est connecté
 if (!isset($_SESSION["user_id"])) {
     $_SESSION["message"] = "Vous devez vous connecter pour accéder à vos réservations.";
     $_SESSION["message_type"] = "warning";
@@ -15,14 +10,19 @@ if (!isset($_SESSION["user_id"])) {
     exit;
 }
 
+require_once "../includes/db_connection.php";
+
+include "../includes/header.php";
+
+echo '<link rel="stylesheet" href="../css/reservation.css?v='.time().'">';
+echo '<script src="../js/reservation.js?v='.time().'" defer></script>';
+
 $user_id = $_SESSION["user_id"];
 $active_tab = isset($_GET['tab']) ? $_GET['tab'] : 'upcoming';
 
-// Traiter l'annulation d'une réservation
 if(isset($_GET['cancel']) && !empty($_GET['cancel'])) {
     $reservation_id = $_GET['cancel'];
 
-    // Vérifier que la réservation appartient bien à l'utilisateur
     $check_sql = "SELECT * FROM bookings WHERE id = ? AND user_id = ?";
     if($stmt = mysqli_prepare($conn, $check_sql)) {
         mysqli_stmt_bind_param($stmt, "ii", $reservation_id, $user_id);
@@ -50,12 +50,11 @@ if(isset($_GET['cancel']) && !empty($_GET['cancel'])) {
         mysqli_stmt_close($stmt);
     }
 
-    // Rediriger pour éviter les soumissions multiples
-    header("location: reservation.php?tab=" . $active_tab);
+    echo "<script>window.location.href='reservation.php?tab=" . $active_tab . "';</script>";
+    exit;
     exit;
 }
 
-// Récupérer les réservations à venir de l'utilisateur
 $upcoming_reservations = [];
 $upcoming_sql = "SELECT b.*, p.title, p.main_image, p.location, p.price, u.username as owner_name, u.id as owner_id 
                  FROM bookings b 

@@ -19,7 +19,7 @@
                 <h5>Contact</h5>
                 <address>
                     <p>Email: contact@omnesbnb.fr</p>
-                    <p>Téléphone: +33 1 XX XX XX XX</p>
+                    <p>Téléphone: +33 06 11 44 52 15</p>
                 </address>
             </div>
         </div>

@@ -1,9 +1,7 @@
 <?php
-require_once "../includes/db_connection.php";
-include "../includes/header.php";
-
-echo '<link rel="stylesheet" href="../css/my-rentals.css">';
-echo '<link rel="stylesheet" href="../css/dashboard.css">';
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 
 if (!isset($_SESSION["user_id"])) {
     $_SESSION["message"] = "Vous devez vous connecter pour accéder à vos locations.";
@@ -12,10 +10,15 @@ if (!isset($_SESSION["user_id"])) {
     exit;
 }
 
-// Récupérer les propriétés de l'utilisateur depuis la base de données
+require_once "../includes/db_connection.php";
+
+include "../includes/header.php";
+
+echo '<link rel="stylesheet" href="../css/my-rentals.css">';
+echo '<link rel="stylesheet" href="../css/dashboard.css">';
+
 $my_properties = [];
 $user_id = $_SESSION["user_id"];
-// Requête pour récupérer les propriétés de l'utilisateur
 $properties_sql = "SELECT p.*, 
                     (SELECT COUNT(*) FROM bookings WHERE property_id = p.id) as booking_count,
                     (SELECT SUM(total_price) FROM bookings WHERE property_id = p.id AND status = 'confirmed') as total_earned
@@ -88,7 +91,6 @@ if ($rented_stmt = mysqli_prepare($conn, $rented_sql)) {
         }
     }
     mysqli_stmt_close($rented_stmt);
-    // Récupérer les locations passées (en tant que propriétaire ou locataire)
     $past_rentals = [];
 
 // Requête pour récupérer les locations passées où l'utilisateur était locataire

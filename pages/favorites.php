@@ -1,16 +1,22 @@
 <?php
+// Démarrer la session avant tout output HTML
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 
-require_once "../includes/db_connection.php";
-include "../includes/header.php";
-
-echo '<link rel="stylesheet" href="../omnesbnb-equipe-2h/css/favorites.css">';
-
+// Vérifier l'authentification avant toute sortie HTML
 if (!isset($_SESSION["user_id"])) {
     $_SESSION["message"] = "Vous devez vous connecter pour accéder à vos favoris.";
     $_SESSION["message_type"] = "warning";
     header("location: login.php");
     exit;
 }
+
+require_once "../includes/db_connection.php";
+
+include "../includes/header.php";
+
+echo '<link rel="stylesheet" href="../css/favorites.css">';
 
 if(isset($_GET["remove"]) && !empty($_GET["remove"])) {
     $property_id = $_GET["remove"];
@@ -27,9 +33,7 @@ if(isset($_GET["remove"]) && !empty($_GET["remove"])) {
             $activity_sql = "INSERT INTO user_activity (user_id, activity_type, property_id) VALUES (?, 'favorite_remove', ?)";
             $activity_stmt = mysqli_prepare($conn, $activity_sql);
             mysqli_stmt_bind_param($activity_stmt, "ii", $user_id, $property_id);
-            mysqli_stmt_execute($activity_stmt);
-
-            header("location: favorites.php");
+            mysqli_stmt_execute($activity_stmt);            echo "<script>window.location.href='favorites.php';</script>";
             exit;
         } else {
             $_SESSION["message"] = "Une erreur est survenue. Veuillez réessayer.";
@@ -88,22 +92,36 @@ if($stmt = mysqli_prepare($conn, $sql)) {
                     <button class="favorite-button favorited" data-property-id="<?php echo $property['id']; ?>">
                         <i class="fas fa-heart"></i>
                     </button>
-                </div>
-
-                <div class="property-info">
+                </div>                <div class="property-info">
                     <h5 class="card-title"><?php echo htmlspecialchars($property['title']); ?></h5>
                     <p class="card-text">
                         <i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($property['location']); ?>
                     </p>
-                    <p class="card-text">
-                        <i class="fas fa-home"></i>
-                        <?php echo htmlspecialchars(ucfirst($property['property_type'])); ?> -
-                        <?php echo htmlspecialchars($property['rooms']); ?> pièce(s)
-                    </p>
-                    <p class="card-text">
-                        <i class="fas fa-user-friends"></i> <?php echo htmlspecialchars($property['max_guests']); ?> personne(s) max
-                    </p>                            <div class="d-flex justify-content-between align-items-center mt-3">
-                        <span class="property-price"><?php echo htmlspecialchars($property['price']); ?>€ / nuit</span>
+                    
+                    <!-- Info appart avec le même style que search.php -->
+                    <div class="property-details mb-3">
+                        <div>
+                            <i class="fas fa-home me-1"></i>
+                            <?php echo htmlspecialchars(ucfirst($property['property_type'])); ?> -
+                            <?php echo htmlspecialchars($property['rooms']); ?> pièce(s)
+                        </div>
+                        <div>
+                            <i class="fas fa-user-friends me-1"></i>
+                            <?php echo htmlspecialchars($property['max_guests']); ?> voyageur(s) max
+                        </div>
+                    </div>
+                    
+                    <!-- Info prix avec le même style que search.php -->
+                    <div class="reservation-price">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-euro-sign me-1"></i>
+                                Prix par nuit
+                            </div>
+                            <span class="price-amount"><?php echo number_format($property['price'], 2, ',', ' '); ?> €</span>
+                        </div>
+                    </div>
+                      <div class="d-flex justify-content-between align-items-center mt-3">
                         <div>
                             <a href="property-details.php?id=<?php echo $property['id']; ?>" class="btn btn-sm btn-outline-secondary me-1">Voir détails</a>
                             <a href="reservation.php?property_id=<?php echo $property['id']; ?>" class="btn btn-sm btn-primary">Réserver</a>

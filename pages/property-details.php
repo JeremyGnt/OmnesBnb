@@ -1,9 +1,9 @@
 <?php
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 
 require_once "../includes/db_connection.php";
-include_once "../includes/header.php";
-
-echo '<link rel="stylesheet" href="../css/property-details.css">';
 
 if (!isset($_GET['id']) || empty($_GET['id'])) {
     $_SESSION['message'] = "Aucun logement spécifié.";
@@ -11,6 +11,10 @@ if (!isset($_GET['id']) || empty($_GET['id'])) {
     header("Location: search.php");
     exit;
 }
+
+include_once "../includes/header.php";
+
+echo '<link rel="stylesheet" href="../css/property-details.css">';
 
 $property_id = (int)$_GET['id'];
 
@@ -87,7 +91,8 @@ while ($review = mysqli_fetch_assoc($reviews_result)) {
 
 $average_rating = $review_count > 0 ? round($total_rating / $review_count, 1) : 0;
 
-$amenities = !empty($property['amenities']) ? explode(',', $property['amenities']) : [];
+// La référence aux équipements a été supprimée
+// $amenities = !empty($property['amenities']) ? explode(',', $property['amenities']) : [];
 
 
 if ($user_id) {
@@ -190,41 +195,7 @@ if ($user_id) {
                         </ul>
                     </div>
                 </div>
-            </div>
-
-            <div class="property-amenities mb-4">
-                <h3>Équipements</h3>
-                <div class="row">
-                    <?php foreach ($amenities as $amenity): ?>
-                        <div class="col-md-4 col-6 mb-2">
-                            <div class="amenity-item">
-                                <?php
-                                $icon = 'fas fa-check';
-                                switch (trim($amenity)) {
-                                    case 'Wi-Fi': $icon = 'fas fa-wifi'; break;
-                                    case 'Télévision':
-                                    case 'TV': $icon = 'fas fa-tv'; break;
-                                    case 'Cuisine équipée': $icon = 'fas fa-utensils'; break;
-                                    case 'Machine à laver': $icon = 'fas fa-tshirt'; break;
-                                    case 'Sèche-linge': $icon = 'fas fa-wind'; break;
-                                    case 'Climatisation': $icon = 'fas fa-snowflake'; break;
-                                    case 'Chauffage': $icon = 'fas fa-temperature-high'; break;
-                                    case 'Espace de travail': $icon = 'fas fa-laptop'; break;
-                                    case 'Parking': $icon = 'fas fa-parking'; break;
-                                    case 'Ascenseur': $icon = 'fas fa-elevator'; break;
-                                    case 'Balcon': $icon = 'fas fa-cloud-sun'; break;
-                                    case 'Terrasse': $icon = 'fas fa-umbrella-beach'; break;
-                                    case 'Salle de bain privée': $icon = 'fas fa-bath'; break;
-                                    case 'Cuisine partagée': $icon = 'fas fa-utensils'; break;
-                                    case 'Salle commune': $icon = 'fas fa-couch'; break;
-                                }
-                                ?>
-                                <i class="<?= $icon ?>"></i> <?= htmlspecialchars(trim($amenity)) ?>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            </div>
+            </div>            <!-- La section équipements a été supprimée -->
 
             <div class="property-location mb-4">
                 <h3>Adresse</h3>
@@ -338,13 +309,7 @@ if ($user_id) {
                     </div>
                     <button type="submit" class="btn btn-primary w-100"<?= $user_id ? '' : ' disabled' ?>>
                         <?= $user_id ? 'Réserver' : 'Connectez-vous pour réserver' ?>
-                    </button>
-
-                    <?php if ($user_id && $user_id != $property['owner_id']): ?>
-                        <a href="start_conversation.php?property_id=<?= $property_id ?>" class="btn btn-outline-primary w-100 mt-2">
-                            <i class="fas fa-comments me-2"></i>Contacter le propriétaire
-                        </a>
-                    <?php endif; ?>
+                    </button>                    <!-- Le bouton "Contacter le propriétaire" a été supprimé -->
 
                     <?php if (!$user_id): ?>
                         <div class="login-prompt mt-2 text-center">

@@ -1,6 +1,7 @@
 <?php
-require_once "../includes/db_connection.php";
-include "../includes/header.php";
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 
 if (!isset($_SESSION["user_id"])) {
     $_SESSION["message"] = "Vous devez vous connecter pour accéder à cette page.";
@@ -9,11 +10,16 @@ if (!isset($_SESSION["user_id"])) {
     exit;
 }
 
+require_once "../includes/db_connection.php";
+
+include "../includes/header.php";
+
+echo '<link rel="stylesheet" href="../css/profile.css">';
+
 $user_id = $_SESSION["user_id"];
 $username = $email = $first_name = $last_name = $phone = "";
 
-/// METTRE IMAGE EN PHOTO DE PROIL
-//$profile_image = "../assets/default-profile.jpg"; // Default profile image
+$profile_image = "assets/profile_images/default.jpg";
 
 $sql = "SELECT username, email, first_name, last_name, phone_number, profile_image FROM users WHERE id = ?";
 
@@ -32,11 +38,10 @@ if($stmt = mysqli_prepare($conn, $sql)){
                 if(!empty($user_profile_image)) {
                     $profile_image = $user_profile_image;
                 }
-            }
-        } else{
+            }        } else{
             $_SESSION["message"] = "Erreur lors de la récupération des informations utilisateur.";
             $_SESSION["message_type"] = "danger";
-            header("location: ../index.php");
+            echo "<script>window.location.href='../index.php';</script>";
             exit;
         }
     } else{
@@ -189,11 +194,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
             }
             $file_extension = pathinfo($_FILES["profile_image"]["name"], PATHINFO_EXTENSION);
             $new_filename = uniqid("profile_") . "." . $file_extension;
-            $upload_path = "../assets/profile_images/" . $new_filename;
-
-            if (move_uploaded_file($_FILES["profile_image"]["tmp_name"], $upload_path)) {
+            $upload_path = "../assets/profile_images/" . $new_filename;            if (move_uploaded_file($_FILES["profile_image"]["tmp_name"], $upload_path)) {
                 $upload_image = true;
-                $new_profile_image = $new_filename;
+                $new_profile_image = "assets/profile_images/" . $new_filename;
             }
         }
     }
@@ -281,7 +284,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
                 $_SESSION["message"] = "Votre profil a été mis à jour avec succès.";
                 $_SESSION["message_type"] = "success";
 
-                header("location: profile.php");
+                echo "<script>window.location.href='profile.php';</script>";
                 exit;
             } else {
                 echo "Oops! Une erreur est survenue. Veuillez réessayer plus tard.";
@@ -296,29 +299,16 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
 ?>
 
 <div class="container py-4">
-    <div class="row">
-        <div class="col-md-4 mb-4">
-            <div class="profile-header text-center">                <div id="profile_preview">
-                    <img src="../<?php echo htmlspecialchars($profile_image); ?>" alt="Photo de profil" class="profile-avatar mb-3">
+    <div class="row">        <div class="col-md-4 mb-4">            <div class="profile-header text-center">
+                <div class="profile-image-container mb-4">
+                    <img src="../<?php echo htmlspecialchars($profile_image); ?>" alt="Photo de profil" class="profile-avatar">
                 </div>
                 <h4><?php echo htmlspecialchars($first_name) . ' ' . htmlspecialchars($last_name); ?></h4>
-                <p class="text-muted"><?php echo htmlspecialchars($email); ?></p>
-                <div class="list-group mt-4">
+                <p class="text-muted"><?php echo htmlspecialchars($email); ?></p>                <div class="list-group mt-4">
                     <a href="#profile-info" class="list-group-item list-group-item-action active" data-bs-toggle="list">
                         <i class="fas fa-user me-2"></i> Informations personnelles
                     </a>
-                    <a href="messages.php" class="list-group-item list-group-item-action">
-                        <i class="fas fa-envelope me-2"></i> Messages
-                    </a>
-                    <a href="#payment-methods" class="list-group-item list-group-item-action" data-bs-toggle="list">
-                        <i class="fas fa-credit-card me-2"></i> Moyens de paiement
-                    </a>
-                    <a href="#notifications" class="list-group-item list-group-item-action" data-bs-toggle="list">
-                        <i class="fas fa-bell me-2"></i> Notifications
-                    </a>
-                    <a href="#privacy" class="list-group-item list-group-item-action" data-bs-toggle="list">
-                        <i class="fas fa-shield-alt me-2"></i> Confidentialité
-                    </a>                    <a href="#change-password" class="list-group-item list-group-item-action" data-bs-toggle="list">
+                    <a href="#change-password" class="list-group-item list-group-item-action" data-bs-toggle="list">
                         <i class="fas fa-lock me-2"></i> Changer de mot de passe
                     </a>
                 </div>
@@ -331,14 +321,10 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
                     <div class="tab-pane fade show active" id="profile-info">
                         <h3 class="mb-4">Informations personnelles</h3>
 
-                        <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post" enctype="multipart/form-data">
-                            <div class="mb-4">
-                                <label for="profile_image_upload" class="form-label d-block text-center">Photo de profil</label>
-                                <div class="text-center mb-3">
-                                    <img id="profile_image_preview" src="../<?php echo htmlspecialchars($profile_image); ?>" alt="Photo de profil" class="profile-avatar mb-2" style="cursor: pointer;" onclick="document.getElementById('profile_image').click();">
-                                    <div class="small text-muted">Cliquez sur l'image pour changer votre photo</div>
-                                </div>
-                                <input type="file" name="profile_image" id="profile_image" class="form-control d-none" accept="image/*" onchange="previewImage(this);">
+                        <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post" enctype="multipart/form-data">                            <div class="mb-4">
+                                <label for="profile_image" class="form-label">Photo de profil</label>
+                                <input class="form-control" type="file" id="profile_image" name="profile_image" accept="image/jpeg,image/png,image/gif" onchange="previewImage(this);">
+                                <div class="form-text">Format JPG, PNG ou GIF. Max 5MB.</div>
                             </div>
 
                             <div class="row">
@@ -385,12 +371,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
                                 <div class="invalid-feedback">
                                     <?php echo $phone_err ?? ''; ?>
                                 </div>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="profile_image" class="form-label">Photo de profil</label>
-                                <input class="form-control" type="file" id="profile_image" name="profile_image" accept="image/*">
-                                <div class="form-text">Format JPG, PNG ou GIF. Max 5MB.</div>
                             </div>
 
                             <div class="d-grid mt-4">
@@ -445,6 +425,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST") {
     </div>
 </div>
 
+<script src="../js/profile.js"></script>
 <?php include "../includes/footer.php"; ?>
 
 

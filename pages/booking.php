@@ -1,8 +1,7 @@
 <?php
-
-require_once "../includes/db_connection.php";
-include "../includes/header.php";
-
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 
 if (!isset($_SESSION["user_id"])) {
     $_SESSION["message"] = "Vous devez vous connecter pour effectuer une réservation.";
@@ -11,6 +10,10 @@ if (!isset($_SESSION["user_id"])) {
     header("Location: login.php");
     exit;
 }
+
+require_once "../includes/db_connection.php";
+
+include "../includes/header.php";
 
 $user_id = $_SESSION["user_id"];
 
@@ -124,11 +127,10 @@ if (isset($_POST['confirm_booking'])) {    // insert dans la base
         $activity_sql = "INSERT INTO user_activity (user_id, activity_type, property_id) VALUES (?, 'booking', ?)";
         $activity_stmt = mysqli_prepare($conn, $activity_sql);
         mysqli_stmt_bind_param($activity_stmt, "ii", $user_id, $property_id);
-        mysqli_stmt_execute($activity_stmt);
-
-        $_SESSION["message"] = "Réservation confirmée avec succès!";
+        mysqli_stmt_execute($activity_stmt);        $_SESSION["message"] = "Réservation confirmée avec succès!";
         $_SESSION["message_type"] = "success";
-        header("Location: reservation.php");
+        // Utiliser JavaScript pour la redirection après HTML output
+        echo "<script>window.location.href='reservation.php?tab=upcoming';</script>";
         exit;
     } else {
         $_SESSION["message"] = "Une erreur est survenue lors de la réservation. Veuillez réessayer.";

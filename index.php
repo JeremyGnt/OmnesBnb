@@ -1,63 +1,28 @@
 <?php
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 
 require_once "includes/db_connection.php";
+
 include "includes/header.php";
 
-
-$featured_properties = [];
-$sql = "SELECT p.*, u.username as owner_name, 
-        (SELECT AVG(r.rating) FROM reviews r JOIN bookings b ON r.booking_id = b.id WHERE b.property_id = p.id) as average_rating
-        FROM properties p 
-        JOIN users u ON p.owner_id = u.id 
-        WHERE p.is_published = TRUE 
-        ORDER BY p.created_at DESC 
-        LIMIT 2";
-
-if ($result = mysqli_query($conn, $sql)) {
-    while ($row = mysqli_fetch_assoc($result)) {
-        $featured_properties[] = $row;
-    }
-}
 ?>
 
 
     <div class="hero-section">
         <div class="hero-overlay"></div>
         <div class="container hero-content">
-            <div class="row align-items-center">
-                <div class="col-lg-7 text-lg-start text-center">
+            <div class="row align-items-center">                <div class="col-12 text-center">
                     <h1 class="hero-title">Trouvez votre logement idéal à Omnes</h1>
                     <p class="hero-text">La plateforme exclusive de colocation et de location pour les étudiants et le personnel d'Omnes</p>
-                    <div class="d-flex flex-wrap gap-3 justify-content-lg-start justify-content-center mt-4">
+                    <div class="d-flex flex-wrap gap-3 justify-content-center mt-4">
                         <a href="pages/search.php" class="btn btn-light btn-lg hero-btn">
                             <i class="fas fa-search me-2"></i>Explorer les logements
                         </a>
                         <a href="pages/publish.php" class="btn btn-outline-light btn-lg hero-btn-outline">
                             <i class="fas fa-home me-2"></i>Proposer mon logement
                         </a>
-                    </div>
-                </div>
-                <div class="col-lg-5 d-none d-lg-block">
-                    <div class="hero-image-container">
-                        <?php if (count($featured_properties) > 0): ?>
-                            <div class="hero-floating-card hero-card-1">
-                                <div class="hero-card-content">
-                                    <div class="hero-card-rating"><i class="fas fa-star"></i> <?php echo number_format($featured_properties[0]['average_rating'] ?? 0, 1); ?></div>
-                                    <h5><?php echo htmlspecialchars($featured_properties[0]['title']); ?></h5>
-                                    <p><?php echo htmlspecialchars($featured_properties[0]['location']); ?>, <?php echo htmlspecialchars($featured_properties[0]['rooms']); ?> chambres</p>
-                                </div>
-                            </div>
-                        <?php endif; ?>
-
-                        <?php if (count($featured_properties) > 1): ?>
-                            <div class="hero-floating-card hero-card-2">
-                                <div class="hero-card-content">
-                                    <div class="hero-card-rating"><i class="fas fa-star"></i> <?php echo number_format($featured_properties[1]['average_rating'] ?? 0, 1); ?></div>
-                                    <h5><?php echo htmlspecialchars($featured_properties[1]['title']); ?></h5>
-                                    <p><?php echo htmlspecialchars($featured_properties[1]['location']); ?>, <?php echo htmlspecialchars($featured_properties[1]['rooms']); ?> chambres</p>
-                                </div>
-                            </div>
-                        <?php endif; ?>
                     </div>
                 </div>
             </div>

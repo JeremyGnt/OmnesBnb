@@ -1,4 +1,5 @@
 <?php
+// Aucun output HTML avant session_start()
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
@@ -55,7 +56,7 @@ if (session_status() == PHP_SESSION_NONE) {
                                 }
                                 mysqli_stmt_close($stmt);
                             }
-                            ?>                                <li><a class="dropdown-item" href="/omnesbnb-equipe-2h/reservation.php"><i class="fas fa-calendar-check me-2"></i>Mes réservations</a></li>
+                            ?>                                <li><a class="dropdown-item" href="/omnesbnb-equipe-2h/pages/reservation.php"><i class="fas fa-calendar-check me-2"></i>Mes réservations</a></li>
                             <li><a class="dropdown-item" href="/omnesbnb-equipe-2h/pages/favorites.php"><i class="fas fa-heart me-2"></i>Mes favoris</a></li>
 
                             <?php

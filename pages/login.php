@@ -1,11 +1,17 @@
 <?php
-require_once "../includes/db_connection.php";
-include "../includes/header.php";
+// Commencer la session avant tout output HTML
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 
 if (isset($_SESSION["user_id"])) {
     header("location: ../index.php");
     exit;
 }
+
+require_once "../includes/db_connection.php";
+
+include "../includes/header.php";
 
 $email = $password = "";
 $email_err = $password_err = $login_err = "";
@@ -42,11 +48,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             $_SESSION["email"] = $email;
                             $_SESSION["first_name"] = $first_name;
                             $_SESSION["last_name"] = $last_name;
-                            $_SESSION["phone_number"] = $phone_number;
-                            $_SESSION["profile_image"] = $profile_image;
+                            $_SESSION["phone_number"] = $phone_number;                            $_SESSION["profile_image"] = $profile_image;
                             $_SESSION["user_type"] = $user_type;
                             $_SESSION["is_verified"] = $is_verified;
-                            header("location: ../index.php");
+                            // Utiliser la redirection JavaScript au lieu de header()
+                            echo "<script>window.location.href='../index.php';</script>";
                             exit;
                         } else {
                             $login_err = "Email ou mot de passe incorrect.";
