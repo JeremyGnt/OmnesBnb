@@ -245,6 +245,76 @@
                         </div>
                     </div>
                 </div>
+                <!-- reservations Tab -->
+                <div class="tab-pane fade <?= $active_tab == 'bookings' ? 'show active' : '' ?>" id="bookings-tab">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Gestion des réservations</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Propriété</th>
+                                        <th>Locataire</th>
+                                        <th>Propriétaire</th>
+                                        <th>Dates</th>
+                                        <th>Montant</th>
+                                        <th>Statut</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <?php foreach ($bookings as $booking): ?>
+                                        <tr>
+                                            <td><?= $booking['id'] ?></td>
+                                            <td>
+                                                <a href="property-details.php?id=<?= $booking['property_id'] ?>">
+                                                    <?= htmlspecialchars($booking['property_title']) ?>
+                                                </a><br>
+                                                <small class="text-muted"><?= htmlspecialchars($booking['property_location']) ?></small>
+                                            </td>
+                                            <td>
+                                                <?= htmlspecialchars($booking['renter_name']) ?><br>
+                                                <small class="text-muted"><?= htmlspecialchars($booking['renter_email']) ?></small>
+                                            </td>
+                                            <td>
+                                                <?= htmlspecialchars($booking['owner_name']) ?><br>
+                                                <small class="text-muted"><?= htmlspecialchars($booking['owner_email']) ?></small>
+                                            </td>
+                                            <td>
+                                                Du <?= date('d/m/Y', strtotime($booking['start_date'])) ?><br>
+                                                au <?= date('d/m/Y', strtotime($booking['end_date'])) ?>
+                                            </td>
+                                            <td><?= number_format($booking['total_price'], 2, ',', ' ') ?> €</td>
+                                            <td>
+                                                <?php if ($booking['status'] == 'confirmed'): ?>
+                                                    <span class="badge bg-success">Confirmée</span>
+                                                <?php elseif ($booking['status'] == 'pending'): ?>
+                                                    <span class="badge bg-warning text-dark">En attente</span>
+                                                <?php else: ?>
+                                                    <span class="badge bg-danger">Annulée</span>
+                                                <?php endif; ?>
+                                            </td>
+                                            <td>
+                                                <a href="edit_booking.php?id=<?= $booking['id'] ?>" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-edit"></i> Modifier
+                                                </a>
+                                                <button class="btn btn-sm btn-outline-danger"
+                                                        onclick="confirmDelete('booking', <?= $booking['id'] ?>, 'Réservation #<?= $booking['id'] ?>')">
+                                                    <i class="fas fa-trash"></i> Supprimer
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
