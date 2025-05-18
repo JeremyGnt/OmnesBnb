@@ -109,5 +109,85 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $type && $id) {
         $_SESSION['message_type'] = "danger";
     }
 }
-
+if ($type && $id) {
+    if ($type === 'booking') {
+        $booking_sql = "SELECT * FROM bookings WHERE id = ?";
+        $booking_stmt = mysqli_prepare($conn, $booking_sql);
+        mysqli_stmt_bind_param($booking_stmt, "i", $id);
+        mysqli_stmt_execute($booking_stmt);
+        $booking_result = mysqli_stmt_get_result($booking_stmt);
+        $booking = mysqli_fetch_assoc($booking_result);
+        $properties = mysqli_query($conn, "SELECT id, title FROM properties ORDER BY title");
+        $users = mysqli_query($conn, "SELECT id, username FROM users ORDER BY username");
+        echo '<div class="container mt-4"><h3>Éditer une réservation</h3><form method="post">';
+        echo '<label>Propriété</label><select name="property_id" class="form-control">';
+        while ($p = mysqli_fetch_assoc($properties)) {
+            $sel = $p['id'] == $booking['property_id'] ? 'selected' : '';
+            echo "<option value='{$p['id']}' $sel>{$p['title']}</option>";
+        }
+        echo '</select>';
+        echo '<label>Utilisateur</label><select name="user_id" class="form-control">';
+        while ($u = mysqli_fetch_assoc($users)) {
+            $sel = $u['id'] == $booking['user_id'] ? 'selected' : '';
+            echo "<option value='{$u['id']}' $sel>{$u['username']}</option>";
+        }
+        echo '</select>';
+        echo '<label>Date début</label><input type="date" name="start_date" class="form-control" value="' . $booking['start_date'] . '">';
+        echo '<label>Date fin</label><input type="date" name="end_date" class="form-control" value="' . $booking['end_date'] . '">';
+        echo '<label>Nombre de voyageurs</label><input type="number" name="guests" class="form-control" value="' . $booking['guests'] . '">';
+        echo '<label>Prix total</label><input type="number" step="0.01" name="total_price" class="form-control" value="' . $booking['total_price'] . '">';
+        echo '<label>Statut</label><input type="text" name="status" class="form-control" value="' . $booking['status'] . '">';
+        echo '<button type="submit" class="btn btn-primary mt-2">Enregistrer</button>';
+        echo '</form></div>';
+    } elseif ($type === 'property') {
+        $property_sql = "SELECT * FROM properties WHERE id = ?";
+        $property_stmt = mysqli_prepare($conn, $property_sql);
+        mysqli_stmt_bind_param($property_stmt, "i", $id);
+        mysqli_stmt_execute($property_stmt);
+        $property_result = mysqli_stmt_get_result($property_stmt);
+        $property = mysqli_fetch_assoc($property_result);
+        $owners = mysqli_query($conn, "SELECT id, username FROM users ORDER BY username");
+        echo '<div class="container mt-4"><h3>Éditer une propriété</h3><form method="post">';
+        echo '<label>Titre</label><input type="text" name="title" class="form-control" value="' . $property['title'] . '">';
+        echo '<label>Description</label><textarea name="description" class="form-control">' . $property['description'] . '</textarea>';
+        echo '<label>Type</label><input type="text" name="property_type" class="form-control" value="' . $property['property_type'] . '">';
+        echo '<label>Lieu</label><input type="text" name="location" class="form-control" value="' . $property['location'] . '">';
+        echo '<label>Adresse</label><input type="text" name="address" class="form-control" value="' . $property['address'] . '">';
+        echo '<label>Ville</label><input type="text" name="city" class="form-control" value="' . $property['city'] . '">';
+        echo '<label>Code postal</label><input type="text" name="postal_code" class="form-control" value="' . $property['postal_code'] . '">';
+        echo '<label>Prix</label><input type="number" step="0.01" name="price" class="form-control" value="' . $property['price'] . '">';
+        echo '<label>Surface (m²)</label><input type="number" name="surface_area" class="form-control" value="' . $property['surface_area'] . '">';
+        echo '<label>Pièces</label><input type="number" name="rooms" class="form-control" value="' . $property['rooms'] . '">';
+        echo '<label>Voyageurs max</label><input type="number" name="max_guests" class="form-control" value="' . $property['max_guests'] . '">';
+        echo '<label>Disponible du</label><input type="date" name="available_from" class="form-control" value="' . $property['available_from'] . '">';
+        echo '<label>Disponible au</label><input type="date" name="available_to" class="form-control" value="' . $property['available_to'] . '">';
+        echo '<label>Publié</label><input type="checkbox" name="is_published" value="1"' . ($property['is_published'] ? ' checked' : '') . '>';
+        echo '<label>Propriétaire</label><select name="owner_id" class="form-control">';
+        while ($o = mysqli_fetch_assoc($owners)) {
+            $sel = $o['id'] == $property['owner_id'] ? 'selected' : '';
+            echo "<option value='{$o['id']}' $sel>{$o['username']}</option>";
+        }
+        echo '</select>';
+        echo '<button type="submit" class="btn btn-primary mt-2">Enregistrer</button>';
+        echo '</form></div>';
+    } elseif ($type === 'review') {
+        $review_sql = "SELECT * FROM reviews WHERE id = ?";
+        $review_stmt = mysqli_prepare($conn, $review_sql);
+        mysqli_stmt_bind_param($review_stmt, "i", $id);
+        mysqli_stmt_execute($review_stmt);
+        $review_result = mysqli_stmt_get_result($review_stmt);
+        $review = mysqli_fetch_assoc($review_result);
+        echo '<div class="container mt-4"><h3>Éditer un avis</h3><form method="post">';
+        echo '<label>Note</label><input type="number" name="rating" class="form-control" min="1" max="5" value="' . $review['rating'] . '">';
+        echo '<label>Commentaire</label><textarea name="comment" class="form-control">' . $review['comment'] . '</textarea>';
+        echo '<button type="submit" class="btn btn-primary mt-2">Enregistrer</button>';
+        echo '</form></div>';
+    }
+}
 ?>
+
+
+
+
+
+
