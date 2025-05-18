@@ -436,13 +436,7 @@ $net_balance = $total_earned - $total_spent;
 
                                     <div class="property-type-badge">
                                         <?php
-                                        $property_types = [
-                                            'apartment' => 'Appartement',
-                                            'studio' => 'Studio',
-                                            'house' => 'Maison',
-                                            'room' => 'Chambre'
-                                        ];
-                                        echo isset($property_types[$property['property_type']]) ? $property_types[$property['property_type']] : ucfirst($property['property_type']);
+                                        echo htmlspecialchars($property['property_type']);
                                         ?>
                                     </div>
 

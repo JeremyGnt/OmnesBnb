@@ -91,9 +91,6 @@ while ($review = mysqli_fetch_assoc($reviews_result)) {
 
 $average_rating = $review_count > 0 ? round($total_rating / $review_count, 1) : 0;
 
-// La référence aux équipements a été supprimée
-// $amenities = !empty($property['amenities']) ? explode(',', $property['amenities']) : [];
-
 
 if ($user_id) {
     $activity_sql = "INSERT INTO user_activity (user_id, activity_type, property_id) VALUES (?, 'property_view', ?)";
@@ -183,7 +180,7 @@ if ($user_id) {
                 <div class="row">
                     <div class="col-md-6">
                         <ul class="features-list">
-                            <li><i class="fas fa-home"></i> <?= htmlspecialchars(ucfirst($property['property_type'])) ?></li>
+                            <li><i class="fas fa-home"></i> <?= htmlspecialchars($property['property_type']) ?></li>
                             <li><i class="fas fa-expand"></i> <?= htmlspecialchars($property['surface_area']) ?> m²</li>
                             <li><i class="fas fa-door-open"></i> <?= htmlspecialchars($property['rooms']) ?> pièce(s)</li>
                         </ul>
@@ -195,7 +192,7 @@ if ($user_id) {
                         </ul>
                     </div>
                 </div>
-            </div>            <!-- La section équipements a été supprimée -->
+            </div>
 
             <div class="property-location mb-4">
                 <h3>Adresse</h3>
@@ -309,7 +306,7 @@ if ($user_id) {
                     </div>
                     <button type="submit" class="btn btn-primary w-100"<?= $user_id ? '' : ' disabled' ?>>
                         <?= $user_id ? 'Réserver' : 'Connectez-vous pour réserver' ?>
-                    </button>                    <!-- Le bouton "Contacter le propriétaire" a été supprimé -->
+                    </button>
 
                     <?php if (!$user_id): ?>
                         <div class="login-prompt mt-2 text-center">

@@ -155,28 +155,21 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     } elseif(!empty($image_errors)){
         $image_err = implode("<br>", $image_errors);
     }
-    // Les équipements ont été supprimés
 
     if(empty($title_err) && empty($location_err) && empty($description_err) && empty($price_err) &&
         empty($start_date_err) && empty($end_date_err) && empty($max_guests_err) && empty($type_err) && empty($image_err)
         && empty($address_err) && empty($city_err) && empty($postal_code_err)){
-//VALUERS DéFAUT
-        // Remove old default assignment:
-        // $address = $location;
-        // $city = "Paris";
-        // $postal_code = "75000";
-
         if(preg_match('/Paris (\d+)(ème|e|er)/i', $location, $matches)) {
             $city = "Paris";
             $postal_code = "750" . str_pad($matches[1], 2, '0', STR_PAD_LEFT);
         }
 
         $property_type_map = [
-            'rental' => 'apartment',
-            'colocation' => 'room',
-            'notice' => 'house'
+            'rental' => 'Location complète',
+            'colocation' => 'Colocation',
+            'notice' => 'Je libère mon logement'
         ];
-        $property_type = isset($property_type_map[$type]) ? $property_type_map[$type] : 'apartment';
+        $property_type = isset($property_type_map[$type]) ? $property_type_map[$type] : $type;
         $surface_area = isset($_POST["surface_area"]) ? intval($_POST["surface_area"]) : 25;
         $rooms = isset($_POST["rooms"]) ? intval($_POST["rooms"]) : 1;
 
@@ -401,19 +394,19 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                         <div class="form-check">
                             <input class="form-check-input" type="radio" name="type" id="type_rental" value="rental" <?php echo (isset($_POST['type']) && $_POST['type'] == "rental") ? "checked" : ""; ?> required>
                             <label class="form-check-label" for="type_rental">
-                                <strong>Location complète</strong> - Je loue tout mon logement pendant mon absence
+                                <strong>Location complète</strong>
                             </label>
                         </div>
                         <div class="form-check">
                             <input class="form-check-input" type="radio" name="type" id="type_colocation" value="colocation" <?php echo (isset($_POST['type']) && $_POST['type'] == "colocation") ? "checked" : ""; ?> required>
                             <label class="form-check-label" for="type_colocation">
-                                <strong>Colocation</strong> - Je propose une chambre ou un espace dans mon logement
+                                <strong>Colocation</strong>
                             </label>
                         </div>
                         <div class="form-check">
                             <input class="form-check-input" type="radio" name="type" id="type_notice" value="notice" <?php echo (isset($_POST['type']) && $_POST['type'] == "notice") ? "checked" : ""; ?> required>
                             <label class="form-check-label" for="type_notice">
-                                <strong>Je libère mon logement</strong> - J'annonce que mon logement sera disponible (information seulement)
+                                <strong>Je libère mon logement</strong>
                             </label>
                         </div>
                     </div>                    <div class="invalid-feedback <?php echo (!empty($type_err)) ? 'd-block' : ''; ?>">
