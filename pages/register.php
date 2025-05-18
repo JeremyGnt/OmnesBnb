@@ -10,8 +10,8 @@ if (isset($_SESSION["user_id"])) {
 
 require_once "../includes/db_connection.php";
 
-$email = $password = $confirm_password = $first_name = $last_name = "";
-$email_err = $password_err = $confirm_password_err = $first_name_err = $last_name_err = $terms_err = "";
+$email = $password = $confirm_password = $first_name = $last_name = $phone_number = "";
+$email_err = $password_err = $confirm_password_err = $first_name_err = $last_name_err = $phone_number_err = $terms_err = "";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (empty(trim($_POST["email"]))) {
@@ -67,21 +67,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
+    if (empty(trim($_POST["phone_number"]))) {
+        $phone_number_err = "Veuillez entrer votre numéro de téléphone.";
+    } elseif (!preg_match("/^[0-9+\s()-]{8,20}$/", trim($_POST["phone_number"]))) {
+        $phone_number_err = "Format de numéro de téléphone invalide.";
+    } else {
+        $phone_number = trim($_POST["phone_number"]);
+    }
+
     if (!isset($_POST['terms'])) {
         $terms_err = "Vous devez accepter les conditions pour vous inscrire.";
     }
-    if (empty($email_err) && empty($password_err) && empty($confirm_password_err) && empty($first_name_err) && empty($last_name_err) && empty($terms_err)) {
+    if (empty($email_err) && empty($password_err) && empty($confirm_password_err) && empty($first_name_err) && empty($last_name_err) && empty($phone_number_err) && empty($terms_err)) {
         $user_type = preg_match("/@(ece\\.fr|omnesintervenant\\.com)$/", $email) ? 'staff' : 'student';
-        // Définir l'image de profil par défaut
         $default_profile_image = "assets/profile_images/default-profile.jpg";
-        
-        $sql = "INSERT INTO users (email, password, first_name, last_name, user_type, profile_image, is_verified) VALUES (?, ?, ?, ?, ?, ?, FALSE)";
+        $sql = "INSERT INTO users (email, password, first_name, last_name, phone_number, user_type, profile_image, is_verified) VALUES (?, ?, ?, ?, ?, ?, ?, FALSE)";
         if ($stmt = mysqli_prepare($conn, $sql)) {
-            mysqli_stmt_bind_param($stmt, "ssssss", $param_email, $param_password, $param_first_name, $param_last_name, $param_user_type, $param_profile_image);
+            mysqli_stmt_bind_param($stmt, "sssssss", $param_email, $param_password, $param_first_name, $param_last_name, $param_phone_number, $param_user_type, $param_profile_image);
             $param_email = $email;
             $param_password = password_hash($password, PASSWORD_DEFAULT);
             $param_first_name = $first_name;
             $param_last_name = $last_name;
+            $param_phone_number = $phone_number;
             $param_user_type = $user_type;
             $param_profile_image = $default_profile_image;
             if (mysqli_stmt_execute($stmt)) {
@@ -130,6 +137,11 @@ echo '<link rel="stylesheet" href="../css/register.css">';
             <label>Confirmer le mot de passe :
                 <input type="password" name="confirm_password">
                 <span class="error"><?php echo $confirm_password_err; ?></span>
+            </label>
+
+            <label>Numéro de téléphone :
+                <input type="text" name="phone_number" value="<?php echo $phone_number; ?>">
+                <span class="error"><?php echo $phone_number_err; ?></span>
             </label>
 
             <label class="checkbox">
